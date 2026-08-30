@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f0e6">
+    <meta name="description" content="A small expense tracker.">
+    <title>Expense Tracker</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.webmanifest">
+  </head>
+  <body>
+    <main>
+      <section aria-labelledby="summary-heading">
+        <h2 id="summary-heading">This month</h2>
+        <p><strong id="month-total">$0.00</strong> across <span id="month-count">0</span> expenses.</p>
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Amount</th></tr>
+          </thead>
+          <tbody id="category-summary"></tbody>
+        </table>
+      </section>
+
+      <section aria-labelledby="entry-heading">
+        <h2 id="entry-heading">New expense</h2>
+        <form id="expense-form">
+          <p>
+            <label for="amount">Amount</label><br>
+            <input id="amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required>
+          </p>
+          <p>
+            <label for="date">Date</label><br>
+            <input id="date" name="date" type="date" required>
+          </p>
+          <p>
+            <label for="category">Category</label><br>
+            <input id="category" name="category" list="categories" autocomplete="off" required>
+            <datalist id="categories">
+              <option value="food"></option>
+              <option value="transport"></option>
+              <option value="shopping"></option>
+              <option value="bills"></option>
+              <option value="travel"></option>
+              <option value="other"></option>
+            </datalist>
+          </p>
+          <p>
+            <label for="merchant">Merchant</label><br>
+            <input id="merchant" name="merchant" autocomplete="off">
+          </p>
+          <p>
+            <label for="note">Note</label><br>
+            <input id="note" name="note" autocomplete="off">
+          </p>
+          <button type="submit">Record expense</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="records-heading">
+        <h2 id="records-heading">Records</h2>
+        <p id="empty-state">No expenses recorded.</p>
+        <table id="records-table" hidden>
+          <thead>
+            <tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr>
+          </thead>
+          <tbody id="records"></tbody>
+        </table>
+      </section>
+
+      <section aria-labelledby="sync-heading">
+        <h2 id="sync-heading">Sync</h2>
+        <p><label for="app-password">App password</label><br>
+          <input id="app-password" type="password" autocomplete="current-password">
+        </p>
+        <p><label><input id="remember-password" type="checkbox" checked> Remember on this device</label></p>
+        <button id="sync-button" type="button">Sync now</button>
+        <p id="sync-status" role="status">Not synced this session.</p>
+      </section>
+    </main>
+
+    <noscript>This application needs JavaScript for offline storage and sync.</noscript>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
