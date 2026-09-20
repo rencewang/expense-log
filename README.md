@@ -19,7 +19,9 @@ cp .env.example .env.local
 npx vercel dev
 ```
 
-Open the URL printed by `vercel dev`. Entries remain in IndexedDB until you press **Sync**.
+Open the URL printed by `vercel dev`. Localhost uses an isolated `expense-log-dev` IndexedDB database and seeds it with fake transactions when empty. Delete that database in browser developer tools to reset the fixtures. Seeded records are read-model data only and are not queued for sync.
+
+Entries remain in IndexedDB until you press **Sync**.
 
 ## Data repository
 
