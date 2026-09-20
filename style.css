@@ -45,6 +45,17 @@ h2 {
   border-bottom: 1px solid #111;
 }
 
+fieldset {
+  width: 22rem;
+  max-width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #111;
+}
+
+fieldset label + label {
+  margin-left: 1rem;
+}
+
 input,
 button {
   max-width: 100%;
@@ -88,8 +99,8 @@ td {
   text-align: left;
 }
 
-th:last-child,
-td:last-child {
+th:nth-last-child(-n + 2),
+td:nth-last-child(-n + 2) {
   text-align: right;
 }
 

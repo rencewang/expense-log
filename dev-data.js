@@ -3,6 +3,7 @@ const FIXTURES = [
   { daysAgo: 1, amountCents: 475, category: "transport", merchant: "Metro", note: "" },
   { daysAgo: 2, amountCents: 6890, category: "bills", merchant: "City Electric", note: "Monthly bill" },
   { daysAgo: 3, amountCents: 1299, category: "food", merchant: "Noodle House", note: "Dinner" },
+  { daysAgo: 4, type: "credit", amountCents: 2350, category: "shopping", merchant: "Bookshop", note: "Return" },
   { daysAgo: 5, amountCents: 3400, category: "shopping", merchant: "Bookshop", note: "Reference book" },
   { daysAgo: 7, amountCents: 825, category: "food", merchant: "Cafe", note: "" },
   { daysAgo: 9, amountCents: 9600, category: "travel", merchant: "Railway", note: "Weekend ticket" },
@@ -29,7 +30,8 @@ export function createDevelopmentExpenses(now = new Date()) {
     date.setDate(date.getDate() - fixture.daysAgo);
 
     return {
-      id: `development-expense-${index + 1}`,
+      id: `development-transaction-${index + 1}`,
+      type: fixture.type ?? "expense",
       date: localDate(date),
       amountCents: fixture.amountCents,
       category: fixture.category,

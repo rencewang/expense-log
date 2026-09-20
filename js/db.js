@@ -87,17 +87,17 @@ export async function setSetting(key, value) {
   await transactionDone(transaction);
 }
 
-export async function recordExpense(expense) {
+export async function recordTransaction(record) {
   const mutation = {
     id: crypto.randomUUID(),
     op: "upsert",
-    transaction: expense,
+    transaction: record,
   };
   const transaction = database.transaction(
     [STORES.transactions, STORES.mutations],
     "readwrite",
   );
-  transaction.objectStore(STORES.transactions).put(expense);
+  transaction.objectStore(STORES.transactions).put(record);
   transaction.objectStore(STORES.mutations).put(mutation);
   await transactionDone(transaction);
 }

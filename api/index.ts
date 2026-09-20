@@ -1,7 +1,10 @@
 import { Hono } from "hono";
 
-type Expense = {
+type TransactionType = "expense" | "credit";
+
+type Transaction = {
   id: string;
+  type?: TransactionType;
   date: string;
   amountCents: number;
   category: string;
@@ -13,7 +16,7 @@ type Expense = {
 type Mutation = {
   id: string;
   op: "upsert";
-  transaction: Expense;
+  transaction: Transaction;
 };
 
 type GitHubFile = {
@@ -110,6 +113,9 @@ function isMutation(value: unknown): value is Mutation {
   return (
     isObject(transaction) &&
     typeof transaction.id === "string" &&
+    (transaction.type === undefined ||
+      transaction.type === "expense" ||
+      transaction.type === "credit") &&
     typeof transaction.date === "string" &&
     Number.isSafeInteger(transaction.amountCents) &&
     (transaction.amountCents as number) > 0 &&
@@ -120,7 +126,7 @@ function isMutation(value: unknown): value is Mutation {
   );
 }
 
-function materialize(mutations: Mutation[]): Expense[] {
+function materialize(mutations: Mutation[]): Transaction[] {
   const latest = new Map<string, Mutation>();
 
   for (const mutation of mutations) {
@@ -133,7 +139,10 @@ function materialize(mutations: Mutation[]): Expense[] {
   }
 
   return [...latest.values()]
-    .map((mutation) => mutation.transaction)
+    .map((mutation) => ({
+      ...mutation.transaction,
+      type: mutation.transaction.type ?? "expense",
+    }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
 }
 

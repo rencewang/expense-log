@@ -46,7 +46,7 @@ GitHub is not queried for every render. The UI reads its local IndexedDB snapsho
 
 ## Data model
 
-Amounts are positive integer cents. Currency is USD for v0.
+Amounts are positive integer cents. `type` is either `expense` or `credit`; credits cover refunds, reimbursements, and income. Existing records without a type are treated as expenses. Currency is USD for v0.
 
 ```json
 {
@@ -54,6 +54,7 @@ Amounts are positive integer cents. Currency is USD for v0.
   "op": "upsert",
   "transaction": {
     "id": "transaction UUID",
+    "type": "expense",
     "date": "2026-08-29",
     "amountCents": 1299,
     "category": "food",
@@ -83,7 +84,7 @@ This is intentionally optimized for one person and a small number of devices, no
 ## v0 scope
 
 - Installable PWA shell
-- Offline expense entry
+- Offline expense and credit entry
 - Local transaction list
 - Current-month total and category totals
 - Manual sync and pull from the private data repository

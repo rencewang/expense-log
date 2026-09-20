@@ -1,4 +1,4 @@
-import { getTransactions, recordExpense } from "../db.js";
+import { getTransactions, recordTransaction } from "../db.js";
 import { createCell, money, today } from "../format.js";
 import { setupSync } from "../sync.js";
 
@@ -15,12 +15,15 @@ async function render() {
   records.replaceChildren();
 
   for (const transaction of transactions) {
+    const type = transaction.type === "credit" ? "credit" : "expense";
+    const amount = money.format(transaction.amountCents / 100);
     const row = document.createElement("tr");
     row.append(
       createCell(transaction.date),
       createCell(transaction.merchant || "—"),
       createCell(transaction.category),
-      createCell(money.format(transaction.amountCents / 100)),
+      createCell(type === "expense" ? amount : ""),
+      createCell(type === "credit" ? amount : ""),
     );
     records.append(row);
   }
@@ -30,12 +33,19 @@ async function render() {
 
   const month = today().slice(0, 7);
   const current = transactions.filter((transaction) => transaction.date.startsWith(month));
-  const total = current.reduce((sum, transaction) => sum + transaction.amountCents, 0);
-  document.querySelector("#month-total").textContent = money.format(total / 100);
+  const spent = current
+    .filter((transaction) => transaction.type !== "credit")
+    .reduce((sum, transaction) => sum + transaction.amountCents, 0);
+  const credits = current
+    .filter((transaction) => transaction.type === "credit")
+    .reduce((sum, transaction) => sum + transaction.amountCents, 0);
+  document.querySelector("#month-spent").textContent = money.format(spent / 100);
+  document.querySelector("#month-credits").textContent = money.format(credits / 100);
+  document.querySelector("#month-net").textContent = money.format((spent - credits) / 100);
   document.querySelector("#month-count").textContent = String(current.length);
 
   const categories = new Map();
-  for (const transaction of current) {
+  for (const transaction of current.filter((record) => record.type !== "credit")) {
     categories.set(
       transaction.category,
       (categories.get(transaction.category) ?? 0) + transaction.amountCents,
@@ -58,8 +68,9 @@ form.addEventListener("submit", async (event) => {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) return;
 
   const now = new Date().toISOString();
-  await recordExpense({
+  await recordTransaction({
     id: crypto.randomUUID(),
+    type: data.get("type") === "credit" ? "credit" : "expense",
     date: String(data.get("date")),
     amountCents,
     category: String(data.get("category")).trim().toLowerCase(),

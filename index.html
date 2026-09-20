@@ -13,7 +13,12 @@
     <main>
       <section aria-labelledby="summary-heading">
         <h2 id="summary-heading">This month</h2>
-        <p><strong id="month-total">$0.00</strong> across <span id="month-count">0</span> expenses.</p>
+        <p>
+          <strong id="month-spent">$0.00</strong> spent ·
+          <strong id="month-credits">$0.00</strong> credited ·
+          <strong id="month-net">$0.00</strong> net outflow across
+          <span id="month-count">0</span> transactions.
+        </p>
         <table>
           <thead>
             <tr><th>Category</th><th>Amount</th></tr>
@@ -23,8 +28,13 @@
       </section>
 
       <section aria-labelledby="entry-heading">
-        <h2 id="entry-heading">New expense</h2>
+        <h2 id="entry-heading">New transaction</h2>
         <form id="expense-form">
+          <fieldset>
+            <legend>Type</legend>
+            <label><input name="type" type="radio" value="expense" checked> Expense</label>
+            <label><input name="type" type="radio" value="credit"> Credit</label>
+          </fieldset>
           <p>
             <label for="amount">Amount</label><br>
             <input id="amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required>
@@ -53,16 +63,16 @@
             <label for="note">Note</label><br>
             <input id="note" name="note" autocomplete="off">
           </p>
-          <button type="submit">Record expense</button>
+          <button type="submit">Record transaction</button>
         </form>
       </section>
 
       <section aria-labelledby="records-heading">
         <h2 id="records-heading">Records</h2>
-        <p id="empty-state">No expenses recorded.</p>
+        <p id="empty-state">No transactions recorded.</p>
         <table id="records-table" hidden>
           <thead>
-            <tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr>
+            <tr><th>Date</th><th>Merchant</th><th>Category</th><th>Debit</th><th>Credit</th></tr>
           </thead>
           <tbody id="records"></tbody>
         </table>
