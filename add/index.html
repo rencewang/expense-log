@@ -22,11 +22,11 @@
       <section aria-labelledby="page-heading">
         <h2 id="page-heading">Add transaction</h2>
         <form id="expense-form">
-          <fieldset>
-            <legend>Type</legend>
+          <p role="group" aria-label="Type">
+            Type<br>
             <label><input name="type" type="radio" value="expense" checked> Expense</label>
             <label><input name="type" type="radio" value="credit"> Credit</label>
-          </fieldset>
+          </p>
           <p>
             <label for="amount">Amount</label><br>
             <input id="amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required>
