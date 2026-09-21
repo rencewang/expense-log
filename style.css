@@ -1,161 +1,20 @@
-:root {
-  color-scheme: light;
-  font-family: Georgia, "Times New Roman", serif;
-  background: #f4f0e6;
-  color: #111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
   max-width: 48rem;
   margin: 0 auto;
-  padding: 1rem;
-  line-height: 1.35;
+  padding: 0 1rem 1rem;
 }
 
-header,
-footer {
-  border: 2px solid #111;
-  padding: 1rem;
-}
-
-header h1 {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-header p,
-footer p {
-  margin-bottom: 0;
-}
-
-section {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 2px solid #111;
-  background: #fffdf7;
-}
-
-h2 {
-  margin-top: 0;
-  border-bottom: 1px solid #111;
-}
-
-fieldset {
-  width: 22rem;
-  max-width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #111;
-}
-
-fieldset label + label {
-  margin-left: 1rem;
-}
-
-input,
-button {
-  max-width: 100%;
-  font: inherit;
-}
-
-input:not([type="checkbox"]) {
-  width: 22rem;
-  padding: 0.35rem;
-  border: 1px solid #111;
-  border-radius: 0;
-  background: #fff;
-}
-
-button {
-  padding: 0.45rem 0.7rem;
-  border: 2px outset #bbb;
-  border-radius: 0;
-  background: #eee;
-  color: #111;
-  cursor: pointer;
-}
-
-button:active {
-  border-style: inset;
-}
-
-button:disabled {
-  cursor: wait;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 0.35rem;
-  border: 1px solid #111;
-  text-align: left;
-}
-
-th:nth-last-child(-n + 2),
-td:nth-last-child(-n + 2) {
-  text-align: right;
-}
-
-#sync-status {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.85rem;
-}
-
-@media (max-width: 34rem) {
-  body {
-    padding: 0.5rem;
-  }
-
-  section,
-  header,
-  footer {
-    padding: 0.7rem;
-  }
-}
-
-.site-header {
-  margin-bottom: 1rem;
-}
-
-.masthead {
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  background: Canvas;
 }
 
-.masthead h1 a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.masthead p {
+.site-nav form {
   margin: 0;
-}
-
-.site-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #111;
-}
-
-.site-header nav a {
-  color: inherit;
-  text-underline-offset: 0.2em;
-}
-
-.site-header nav a[aria-current="page"] {
-  font-weight: 700;
-  text-decoration-thickness: 2px;
 }

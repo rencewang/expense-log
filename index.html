@@ -11,18 +11,12 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <header class="site-header">
-      <div class="masthead">
-        <h1><a href="/">Outgo</a></h1>
-        <p>Personal ledger</p>
-      </div>
-      <nav aria-label="Primary">
-        <a href="/" aria-current="page">Overview</a>
-        <a href="/transactions/">Ledger</a>
-        <a href="/add/">Add</a>
-        <a href="/analytics/">Analysis</a>
-      </nav>
-    </header>
+    <nav class="site-nav" aria-label="Primary">
+      <form action="/"><button type="submit" aria-current="page" disabled>Overview</button></form>
+      <form action="/transactions/"><button type="submit">Ledger</button></form>
+      <form action="/add/"><button type="submit">Add</button></form>
+      <form action="/analytics/"><button type="submit">Analysis</button></form>
+    </nav>
 
     <main>
       <section aria-labelledby="summary-heading">
