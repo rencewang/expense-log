@@ -5,11 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f4f0e6">
     <meta name="description" content="A small expense tracker.">
-    <title>Expense Tracker</title>
+    <title>Overview · Outgo</title>
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="stylesheet" href="/style.css">
   </head>
   <body>
+    <header class="site-header">
+      <div class="masthead">
+        <h1><a href="/">Outgo</a></h1>
+        <p>Personal ledger</p>
+      </div>
+      <nav aria-label="Primary">
+        <a href="/" aria-current="page">Overview</a>
+        <a href="/transactions/">Ledger</a>
+        <a href="/add/">Add</a>
+        <a href="/analytics/">Analysis</a>
+      </nav>
+    </header>
+
     <main>
       <section aria-labelledby="summary-heading">
         <h2 id="summary-heading">This month</h2>
