@@ -1,20 +1,233 @@
+@font-face {
+  font-family: "ABC Areal";
+  src: url("/fonts/ABCAreal-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ABC Areal";
+  src: url("/fonts/ABCAreal-RegularItalic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  background: #fff;
+  color: #000;
+  font-family: "ABC Areal", Arial, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.15;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   max-width: 48rem;
   margin: 0 auto;
-  padding: 0 1rem 1rem;
+  padding: 0 2px 2rem;
+  background: #fff;
+  color: #000;
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+input {
+  font: inherit;
 }
 
 .site-nav {
   position: sticky;
   top: 0;
   z-index: 1;
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  background: Canvas;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px 0;
+  background: #fff;
 }
 
 .site-nav form {
   margin: 0;
+}
+
+.site-nav button {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.35rem;
+  border: 2px solid #000;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.site-nav form:nth-child(1) button {
+  border-radius: 1.25rem 2.75rem 2rem 3rem;
+}
+
+.site-nav form:nth-child(2) button {
+  border-radius: 2.75rem 1.25rem 3rem 2rem;
+}
+
+.site-nav form:nth-child(3) button {
+  border-radius: 2rem 3rem 1.25rem 2.5rem;
+}
+
+.site-nav form:nth-child(4) button {
+  border-radius: 3rem 1rem 2.5rem 1.75rem;
+}
+
+.site-nav button:disabled {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+  cursor: default;
+  opacity: 1;
+}
+
+main {
+  display: grid;
+  gap: 2px;
+}
+
+section {
+  margin: 0;
+  padding: 1rem 1rem 1.5rem;
+  overflow-x: auto;
+  background: #000;
+  color: #fff;
+}
+
+section:nth-child(4n + 1) {
+  border-radius: 1.75rem 3.75rem 5rem 4.25rem;
+}
+
+section:nth-child(4n + 2) {
+  border-radius: 3.25rem 1.5rem 2.25rem 4rem;
+}
+
+section:nth-child(4n + 3) {
+  border-radius: 2.5rem 4rem 3.25rem 1.5rem;
+}
+
+section:nth-child(4n) {
+  border-radius: 4rem 1rem 3.25rem 2.5rem;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.4rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+strong {
+  font-weight: 400;
+}
+
+#month-spent,
+#month-credits,
+#month-net {
+  font-size: 1.25em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: inherit;
+}
+
+th,
+td {
+  padding: 0.4rem 0.25rem;
+  border-bottom: 1px solid currentColor;
+  text-align: left;
+  font-weight: 400;
+  vertical-align: top;
+}
+
+th {
+  font-style: italic;
+}
+
+#category-summary th:last-child,
+#category-summary td:last-child,
+#records-table th:nth-child(n + 4),
+#records-table td:nth-child(n + 4) {
+  text-align: right;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="password"],
+input:not([type]) {
+  width: min(100%, 24rem);
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-radius: 1.25rem 2rem 1.5rem 0.75rem;
+  background: #fff;
+  color: #000;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: #fff;
+}
+
+section button {
+  padding: 0.55rem 0.85rem;
+  border: 0;
+  border-radius: 1.5rem 2.75rem 2rem 3rem;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.site-nav button:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: -4px;
+}
+
+section button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+noscript {
+  display: block;
+  margin-top: 2px;
+  padding: 1rem;
+  border: 2px solid #000;
+}
+
+@media (max-width: 36rem) {
+  :root {
+    font-size: 1rem;
+  }
+
+  .site-nav button {
+    min-height: 2.5rem;
+    padding-inline: 0.2rem;
+  }
+
+  section {
+    padding: 1rem 0.85rem 1.4rem;
+  }
 }
