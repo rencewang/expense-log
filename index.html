@@ -41,57 +41,6 @@
         </table>
       </section>
 
-      <section aria-labelledby="entry-heading">
-        <h2 id="entry-heading">New transaction</h2>
-        <form id="expense-form">
-          <fieldset>
-            <legend>Type</legend>
-            <label><input name="type" type="radio" value="expense" checked> Expense</label>
-            <label><input name="type" type="radio" value="credit"> Credit</label>
-          </fieldset>
-          <p>
-            <label for="amount">Amount</label><br>
-            <input id="amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" required>
-          </p>
-          <p>
-            <label for="date">Date</label><br>
-            <input id="date" name="date" type="date" required>
-          </p>
-          <p>
-            <label for="category">Category</label><br>
-            <input id="category" name="category" list="categories" autocomplete="off" required>
-            <datalist id="categories">
-              <option value="food"></option>
-              <option value="transport"></option>
-              <option value="shopping"></option>
-              <option value="bills"></option>
-              <option value="travel"></option>
-              <option value="other"></option>
-            </datalist>
-          </p>
-          <p>
-            <label for="merchant">Merchant</label><br>
-            <input id="merchant" name="merchant" autocomplete="off">
-          </p>
-          <p>
-            <label for="note">Note</label><br>
-            <input id="note" name="note" autocomplete="off">
-          </p>
-          <button type="submit">Record transaction</button>
-        </form>
-      </section>
-
-      <section aria-labelledby="records-heading">
-        <h2 id="records-heading">Records</h2>
-        <p id="empty-state">No transactions recorded.</p>
-        <table id="records-table" hidden>
-          <thead>
-            <tr><th>Date</th><th>Merchant</th><th>Category</th><th>Debit</th><th>Credit</th></tr>
-          </thead>
-          <tbody id="records"></tbody>
-        </table>
-      </section>
-
       <section aria-labelledby="sync-heading">
         <h2 id="sync-heading">Sync</h2>
         <p><label for="app-password">App password</label><br>
