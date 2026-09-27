@@ -11,13 +11,6 @@ const STORES = {
   categories: "categories",
 };
 
-// Transactions recorded before configured categories stored a category name.
-// Each name maps to a deterministic ID. Must match legacyCategoryId() in
-// api/index.ts.
-export function legacyCategoryId(name) {
-  return `legacy:${name.trim().toLowerCase()}`;
-}
-
 function requestResult(request) {
   return new Promise((resolve, reject) => {
     request.addEventListener("success", () => resolve(request.result));
@@ -46,42 +39,11 @@ function openDatabase() {
       }
       if (event.oldVersion < 2) {
         database.createObjectStore(STORES.categories, { keyPath: "id" });
-        migrateLegacyCategories(request.transaction);
       }
     });
 
     request.addEventListener("success", () => resolve(request.result));
     request.addEventListener("error", () => reject(request.error));
-  });
-}
-
-// Gives local transactions a category ID and creates a category record for
-// each legacy name. The server applies the same mapping to synced history,
-// so these records need no mutations of their own.
-function migrateLegacyCategories(upgrade) {
-  const transactions = upgrade.objectStore(STORES.transactions);
-  const categories = upgrade.objectStore(STORES.categories);
-  const names = new Set();
-  transactions.openCursor().addEventListener("success", (event) => {
-    const cursor = event.target.result;
-    if (cursor) {
-      const { category, ...record } = cursor.value;
-      if (!record.categoryId) {
-        const name = (category ?? "").trim().toLowerCase() || "uncategorized";
-        names.add(name);
-        cursor.update({ ...record, categoryId: legacyCategoryId(name) });
-      }
-      cursor.continue();
-      return;
-    }
-    for (const name of names) {
-      categories.put({
-        id: legacyCategoryId(name),
-        name,
-        archived: false,
-        updatedAt: "1970-01-01T00:00:00.000Z",
-      });
-    }
   });
 }
 

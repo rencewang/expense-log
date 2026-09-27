@@ -63,9 +63,6 @@ export async function setupSync({ afterSync } = {}) {
   const syncStatus = document.querySelector("#sync-status");
   let sessionExpired = false;
 
-  // Remove the app password stored by earlier versions.
-  await setSetting("app-password", "");
-
   const showStatus = (text) => {
     if (syncStatus) syncStatus.textContent = text;
   };

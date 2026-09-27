@@ -176,7 +176,6 @@ function isMutation(value: unknown): value is Mutation {
   return (value.entity === undefined || value.entity === "transaction") && isTransaction(value.transaction);
 }
 
-// Must match legacyCategoryId() in js/db.js.
 function legacyCategoryId(name: string): string {
   return `legacy:${name.trim().toLowerCase()}`;
 }
