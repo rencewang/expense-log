@@ -1,3 +1,4 @@
+import "../site.js";
 import { getCategoryNames, getTransactions } from "../db.js";
 import { createCell, money, today } from "../format.js";
 import { setupSync } from "../sync.js";
