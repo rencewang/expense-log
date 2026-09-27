@@ -13,11 +13,20 @@ type Transaction = {
   updatedAt: string;
 };
 
-type Mutation = {
+type UpsertMutation = {
   id: string;
   op: "upsert";
   transaction: Transaction;
 };
+
+type DeleteMutation = {
+  id: string;
+  op: "delete";
+  transactionId: string;
+  deletedAt: string;
+};
+
+type Mutation = UpsertMutation | DeleteMutation;
 
 type GitHubFile = {
   sha: string | null;
@@ -108,7 +117,11 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isMutation(value: unknown): value is Mutation {
-  if (!isObject(value) || value.op !== "upsert" || typeof value.id !== "string") return false;
+  if (!isObject(value) || typeof value.id !== "string") return false;
+  if (value.op === "delete") {
+    return typeof value.transactionId === "string" && typeof value.deletedAt === "string";
+  }
+  if (value.op !== "upsert") return false;
   const transaction = value.transaction;
   return (
     isObject(transaction) &&
@@ -126,10 +139,18 @@ function isMutation(value: unknown): value is Mutation {
   );
 }
 
+// Latest upsert per transaction ID wins. A delete tombstone is final: any
+// transaction with a tombstone is omitted, even if a later upsert exists
+// (for example, from a device that was offline when it was deleted).
 function materialize(mutations: Mutation[]): Transaction[] {
-  const latest = new Map<string, Mutation>();
+  const latest = new Map<string, UpsertMutation>();
+  const deleted = new Set<string>();
 
   for (const mutation of mutations) {
+    if (mutation.op === "delete") {
+      deleted.add(mutation.transactionId);
+      continue;
+    }
     const previous = latest.get(mutation.transaction.id);
     const currentOrder = `${mutation.transaction.updatedAt}:${mutation.id}`;
     const previousOrder = previous
@@ -139,6 +160,7 @@ function materialize(mutations: Mutation[]): Transaction[] {
   }
 
   return [...latest.values()]
+    .filter((mutation) => !deleted.has(mutation.transaction.id))
     .map((mutation) => ({
       ...mutation.transaction,
       type: mutation.transaction.type ?? "expense",

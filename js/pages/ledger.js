@@ -12,6 +12,12 @@ const emptyState = document.querySelector("#empty-state");
 for (const transaction of transactions) {
   const type = transaction.type === "credit" ? "credit" : "expense";
   const amount = money.format(transaction.amountCents / 100);
+  const editLink = document.createElement("a");
+  editLink.href = `/add/?id=${encodeURIComponent(transaction.id)}`;
+  editLink.textContent = "Edit";
+  const editCell = document.createElement("td");
+  editCell.append(editLink);
+
   const row = document.createElement("tr");
   row.append(
     createCell(transaction.date),
@@ -19,6 +25,7 @@ for (const transaction of transactions) {
     createCell(transaction.category),
     createCell(type === "expense" ? amount : ""),
     createCell(type === "credit" ? amount : ""),
+    editCell,
   );
   records.append(row);
 }

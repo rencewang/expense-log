@@ -43,7 +43,10 @@ export async function setupSync({ afterSync } = {}) {
       }
 
       const result = await response.json();
-      await replaceSnapshot(result.transactions);
+      await replaceSnapshot(
+        result.transactions,
+        mutations.map((mutation) => mutation.id),
+      );
       await afterSync?.();
       syncStatus.textContent = `Synced ${result.accepted} local change(s) at ${new Date().toLocaleTimeString()}.`;
     } catch (error) {

@@ -1,4 +1,4 @@
-const CACHE = "expense-log-v9";
+const CACHE = "expense-log-v10";
 const STATIC_FILES = [
   "/",
   "/index.html",

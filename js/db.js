@@ -87,6 +87,13 @@ export async function setSetting(key, value) {
   await transactionDone(transaction);
 }
 
+export async function getTransaction(id) {
+  const transaction = database.transaction(STORES.transactions, "readonly");
+  return requestResult(transaction.objectStore(STORES.transactions).get(id));
+}
+
+// Records a new transaction or an edit. An edit reuses the transaction ID
+// with a newer updatedAt; the server keeps the latest upsert per ID.
 export async function recordTransaction(record) {
   const mutation = {
     id: crypto.randomUUID(),
@@ -102,14 +109,43 @@ export async function recordTransaction(record) {
   await transactionDone(transaction);
 }
 
-export async function replaceSnapshot(transactions) {
+// Deletion is a permanent tombstone: once synced, no later upsert can
+// restore the transaction.
+export async function deleteTransaction(transactionId) {
+  const mutation = {
+    id: crypto.randomUUID(),
+    op: "delete",
+    transactionId,
+    deletedAt: new Date().toISOString(),
+  };
+  const transaction = database.transaction(
+    [STORES.transactions, STORES.mutations],
+    "readwrite",
+  );
+  transaction.objectStore(STORES.transactions).delete(transactionId);
+  transaction.objectStore(STORES.mutations).put(mutation);
+  await transactionDone(transaction);
+}
+
+// Replaces local records with the server snapshot, clearing only the
+// mutations that were sent. Changes made while the sync was in flight stay
+// queued and are reapplied on top of the snapshot.
+export async function replaceSnapshot(transactions, syncedMutationIds) {
   const transaction = database.transaction(
     [STORES.transactions, STORES.mutations],
     "readwrite",
   );
   const records = transaction.objectStore(STORES.transactions);
+  const mutations = transaction.objectStore(STORES.mutations);
+
+  for (const id of syncedMutationIds) mutations.delete(id);
+  const pending = await requestResult(mutations.getAll());
+
   records.clear();
   for (const record of transactions) records.put(record);
-  transaction.objectStore(STORES.mutations).clear();
+  for (const mutation of pending) {
+    if (mutation.op === "delete") records.delete(mutation.transactionId);
+    else records.put(mutation.transaction);
+  }
   await transactionDone(transaction);
 }
