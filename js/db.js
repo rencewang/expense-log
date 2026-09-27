@@ -47,14 +47,16 @@ function openDatabase() {
 
 const database = await openDatabase();
 
+// One-shot reads. Each opens its own read-only transaction.
+function read(storeName, request) {
+  const transaction = database.transaction(storeName, "readonly");
+  return requestResult(request(transaction.objectStore(storeName)));
+}
+
 async function seedDevelopmentDatabase() {
   if (!IS_LOCAL_DEVELOPMENT) return;
 
-  const countTransaction = database.transaction(STORES.transactions, "readonly");
-  const count = await requestResult(
-    countTransaction.objectStore(STORES.transactions).count(),
-  );
-  if (count > 0) return;
+  if ((await read(STORES.transactions, (store) => store.count())) > 0) return;
 
   // Loaded only on localhost, so production never downloads the fixtures.
   const { createDevelopmentData } = await import("../dev-data.js");
@@ -70,9 +72,8 @@ async function seedDevelopmentDatabase() {
 
 await seedDevelopmentDatabase();
 
-async function getAll(storeName) {
-  const transaction = database.transaction(storeName, "readonly");
-  return requestResult(transaction.objectStore(storeName).getAll());
+function getAll(storeName) {
+  return read(storeName, (store) => store.getAll());
 }
 
 export function getTransactions() {
@@ -113,9 +114,8 @@ export function getMutations() {
 }
 
 export async function getSetting(key) {
-  const transaction = database.transaction(STORES.settings, "readonly");
-  const value = await requestResult(transaction.objectStore(STORES.settings).get(key));
-  return value?.value ?? "";
+  const record = await read(STORES.settings, (store) => store.get(key));
+  return record?.value ?? "";
 }
 
 export async function setSetting(key, value) {
@@ -126,9 +126,8 @@ export async function setSetting(key, value) {
   await transactionDone(transaction);
 }
 
-export async function getTransaction(id) {
-  const transaction = database.transaction(STORES.transactions, "readonly");
-  return requestResult(transaction.objectStore(STORES.transactions).get(id));
+export function getTransaction(id) {
+  return read(STORES.transactions, (store) => store.get(id));
 }
 
 // Records a new transaction or an edit. An edit reuses the transaction ID
