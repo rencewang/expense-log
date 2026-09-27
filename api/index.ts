@@ -127,13 +127,24 @@ async function writeGitHubFile(file: GitHubFile, content: string): Promise<Respo
   });
 }
 
+// Skips lines that are not valid JSON or not a known mutation, so one
+// corrupt line cannot break every sync. Skipped lines stay in the file:
+// sync appends to the raw content rather than rewriting it.
 function parseMutations(content: string): Mutation[] {
-  if (!content.trim()) return [];
-  return content
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as Mutation)
-    .filter(isMutation);
+  const mutations: Mutation[] = [];
+  content.split("\n").forEach((line, index) => {
+    if (!line.trim()) return;
+    let value: unknown;
+    try {
+      value = JSON.parse(line);
+    } catch {
+      console.warn(`Skipping unparseable mutation on line ${index + 1}`);
+      return;
+    }
+    if (isMutation(value)) mutations.push(value);
+    else console.warn(`Skipping invalid mutation on line ${index + 1}`);
+  });
+  return mutations;
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -285,7 +296,8 @@ app.post("/sync", async (context) => {
     }
 
     const allMutations = [...existing, ...accepted];
-    const content = `${allMutations.map((mutation) => JSON.stringify(mutation)).join("\n")}\n`;
+    const prefix = file.content && !file.content.endsWith("\n") ? `${file.content}\n` : file.content;
+    const content = `${prefix}${accepted.map((mutation) => JSON.stringify(mutation)).join("\n")}\n`;
     const response = await writeGitHubFile(file, content);
 
     if (response.ok) {
