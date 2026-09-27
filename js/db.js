@@ -74,15 +74,14 @@ function migrateLegacyCategories(upgrade) {
       cursor.continue();
       return;
     }
-    [...names].sort().forEach((name, order) => {
+    for (const name of names) {
       categories.put({
         id: legacyCategoryId(name),
         name,
-        order,
         archived: false,
         updatedAt: "1970-01-01T00:00:00.000Z",
       });
-    });
+    }
   });
 }
 
@@ -118,17 +117,17 @@ export function getTransactions() {
   return getAll(STORES.transactions);
 }
 
-// Sorted by display order.
+// Sorted alphabetically.
 export async function getCategories() {
   const categories = await getAll(STORES.categories);
-  return categories.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  return categories.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getCategoryNames() {
   return new Map((await getCategories()).map((category) => [category.id, category.name]));
 }
 
-// Creates, renames, reorders, archives or restores a category. Categories
+// Creates, renames, archives or restores a category. Categories
 // are never deleted because transactions keep referencing them.
 export async function recordCategories(records) {
   const transaction = database.transaction(

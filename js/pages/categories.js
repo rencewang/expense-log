@@ -20,11 +20,10 @@ function nameTaken(categories, name, exceptId) {
   );
 }
 
-function button(label, onClick, disabled = false) {
+function button(label, onClick) {
   const element = document.createElement("button");
   element.type = "button";
   element.textContent = label;
-  element.disabled = disabled;
   element.addEventListener("click", onClick);
   return element;
 }
@@ -35,25 +34,13 @@ async function save(records, message) {
   await render();
 }
 
-// Moves a category one place and renumbers the active list, recording only
-// the categories whose order changed.
-async function move(active, index, offset) {
-  const reordered = [...active];
-  const [moved] = reordered.splice(index, 1);
-  reordered.splice(index + offset, 0, moved);
-  const changed = reordered
-    .map((category, order) => (category.order === order ? null : stamp(category, { order })))
-    .filter(Boolean);
-  await save(changed, `Moved ${moved.name}.`);
-}
-
 async function render() {
   const categories = await getCategories();
   const active = categories.filter((category) => !category.archived);
   const archived = categories.filter((category) => category.archived);
 
   activeList.replaceChildren();
-  active.forEach((category, index) => {
+  for (const category of active) {
     const form = document.createElement("form");
     const input = document.createElement("input");
     input.name = "name";
@@ -66,8 +53,6 @@ async function render() {
     rename.textContent = "Rename";
     form.append(
       input, " ", rename, " ",
-      button("Up", () => move(active, index, -1), index === 0), " ",
-      button("Down", () => move(active, index, 1), index === active.length - 1), " ",
       button("Archive", () =>
         save([stamp(category, { archived: true })], `Archived ${category.name}.`),
       ),
@@ -85,7 +70,7 @@ async function render() {
     const item = document.createElement("li");
     item.append(form);
     activeList.append(item);
-  });
+  }
 
   archivedList.replaceChildren();
   for (const category of archived) {
@@ -94,7 +79,7 @@ async function render() {
       `${category.name} `,
       button("Restore", () =>
         save(
-          [stamp(category, { archived: false, order: active.length })],
+          [stamp(category, { archived: false })],
           `Restored ${category.name}.`,
         ),
       ),
@@ -116,9 +101,8 @@ newForm.addEventListener("submit", async (event) => {
     status.textContent = `A category named ${name} already exists.`;
     return;
   }
-  const order = Math.max(-1, ...categories.map((category) => category.order)) + 1;
   await save(
-    [{ id: crypto.randomUUID(), name, order, archived: false, updatedAt: new Date().toISOString() }],
+    [{ id: crypto.randomUUID(), name, archived: false, updatedAt: new Date().toISOString() }],
     `Added ${name}.`,
   );
   newForm.reset();

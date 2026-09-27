@@ -69,7 +69,7 @@ Each JSONL line is an immutable mutation. The server deduplicates by mutation ID
 
 A deletion is a permanent tombstone, `{"op": "delete", "transactionId", "deletedAt"}`.
 
-Categories are a second entity in the same file, `{"op": "upsert", "entity": "category", "category": {"id", "name", "order", "archived", "updatedAt"}}`. They resolve the same way and are archived rather than deleted, because past transactions keep referencing them. Mutations without `entity` are transactions.
+Categories are a second entity in the same file, `{"op": "upsert", "entity": "category", "category": {"id", "name", "archived", "updatedAt"}}`. They are listed alphabetically, resolve the same way and are archived rather than deleted, because past transactions keep referencing them. Mutations without `entity` are transactions.
 
 Transactions written before configured categories store a `category` name instead of `categoryId`. The server maps each name to the ID `legacy:<name>` and synthesizes a category record for it unless an explicit record with that ID exists, so renaming a legacy category needs no history rewrite.
 

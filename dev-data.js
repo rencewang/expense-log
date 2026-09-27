@@ -26,10 +26,9 @@ function localDate(date) {
 const CATEGORY_NAMES = ["food", "transport", "shopping", "bills", "travel", "other"];
 
 function createDevelopmentCategories(now) {
-  return CATEGORY_NAMES.map((name, order) => ({
+  return CATEGORY_NAMES.map((name) => ({
     id: `development-category-${name}`,
     name,
-    order,
     archived: false,
     updatedAt: now.toISOString(),
   }));

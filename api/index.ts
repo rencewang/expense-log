@@ -19,7 +19,6 @@ type Transaction = {
 type Category = {
   id: string;
   name: string;
-  order: number;
   archived: boolean;
   updatedAt: string;
 };
@@ -162,8 +161,6 @@ function isCategory(value: unknown): value is Category {
     typeof value.id === "string" &&
     typeof value.name === "string" &&
     value.name.trim().length > 0 &&
-    typeof value.order === "number" &&
-    Number.isFinite(value.order) &&
     typeof value.archived === "boolean" &&
     typeof value.updatedAt === "string"
   );
@@ -235,20 +232,16 @@ function materialize(mutations: Mutation[]): Snapshot {
   const records = [...categories.values()].map((mutation) => mutation.category);
   const synthesized = [...legacyNames]
     .filter(([id]) => !categories.has(id))
-    .sort((a, b) => a[1].localeCompare(b[1]))
-    .map(([id, name], index) => ({
+    .map(([id, name]) => ({
       id,
       name,
-      order: records.length + index,
       archived: false,
       updatedAt: "1970-01-01T00:00:00.000Z",
     }));
 
   return {
     transactions: current,
-    categories: [...records, ...synthesized].sort(
-      (a, b) => a.order - b.order || a.name.localeCompare(b.name),
-    ),
+    categories: [...records, ...synthesized].sort((a, b) => a.name.localeCompare(b.name)),
   };
 }
 
