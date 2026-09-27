@@ -1,5 +1,5 @@
 import "../site.js";
-import { getTransactions } from "../db.js";
+import { getCategoryNames, getTransactions } from "../db.js";
 import { createCell, money } from "../format.js";
 import { setupSync } from "../sync.js";
 
@@ -9,6 +9,7 @@ const emptyState = document.querySelector("#empty-state");
 
 async function render() {
   const transactions = await getTransactions();
+  const categoryNames = await getCategoryNames();
   transactions.sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
 
   records.replaceChildren();
@@ -25,7 +26,7 @@ async function render() {
     row.append(
       createCell(transaction.date),
       createCell(transaction.merchant || "—"),
-      createCell(transaction.category),
+      createCell(categoryNames.get(transaction.categoryId) ?? "—"),
       createCell(type === "expense" ? amount : ""),
       createCell(type === "credit" ? amount : ""),
       editCell,

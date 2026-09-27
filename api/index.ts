@@ -2,21 +2,41 @@ import { Hono } from "hono";
 
 type TransactionType = "expense" | "credit";
 
+// New transactions reference a category by ID. Transactions written before
+// configured categories store the category name in `category` instead.
 type Transaction = {
   id: string;
   type?: TransactionType;
   date: string;
   amountCents: number;
-  category: string;
+  categoryId?: string;
+  category?: string;
   merchant: string;
   note: string;
   updatedAt: string;
 };
 
-type UpsertMutation = {
+type Category = {
+  id: string;
+  name: string;
+  order: number;
+  archived: boolean;
+  updatedAt: string;
+};
+
+// Mutations without `entity` predate categories and are transaction upserts.
+type TransactionUpsert = {
   id: string;
   op: "upsert";
+  entity?: "transaction";
   transaction: Transaction;
+};
+
+type CategoryUpsert = {
+  id: string;
+  op: "upsert";
+  entity: "category";
+  category: Category;
 };
 
 type DeleteMutation = {
@@ -26,7 +46,12 @@ type DeleteMutation = {
   deletedAt: string;
 };
 
-type Mutation = UpsertMutation | DeleteMutation;
+type Mutation = TransactionUpsert | CategoryUpsert | DeleteMutation;
+
+type Snapshot = {
+  transactions: Transaction[];
+  categories: Category[];
+};
 
 type GitHubFile = {
   sha: string | null;
@@ -116,56 +141,115 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function isTransaction(value: unknown): value is Transaction {
+  return (
+    isObject(value) &&
+    typeof value.id === "string" &&
+    (value.type === undefined || value.type === "expense" || value.type === "credit") &&
+    typeof value.date === "string" &&
+    Number.isSafeInteger(value.amountCents) &&
+    (value.amountCents as number) > 0 &&
+    (typeof value.categoryId === "string" || typeof value.category === "string") &&
+    typeof value.merchant === "string" &&
+    typeof value.note === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isCategory(value: unknown): value is Category {
+  return (
+    isObject(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    value.name.trim().length > 0 &&
+    typeof value.order === "number" &&
+    Number.isFinite(value.order) &&
+    typeof value.archived === "boolean" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
 function isMutation(value: unknown): value is Mutation {
   if (!isObject(value) || typeof value.id !== "string") return false;
   if (value.op === "delete") {
     return typeof value.transactionId === "string" && typeof value.deletedAt === "string";
   }
   if (value.op !== "upsert") return false;
-  const transaction = value.transaction;
-  return (
-    isObject(transaction) &&
-    typeof transaction.id === "string" &&
-    (transaction.type === undefined ||
-      transaction.type === "expense" ||
-      transaction.type === "credit") &&
-    typeof transaction.date === "string" &&
-    Number.isSafeInteger(transaction.amountCents) &&
-    (transaction.amountCents as number) > 0 &&
-    typeof transaction.category === "string" &&
-    typeof transaction.merchant === "string" &&
-    typeof transaction.note === "string" &&
-    typeof transaction.updatedAt === "string"
-  );
+  if (value.entity === "category") return isCategory(value.category);
+  return (value.entity === undefined || value.entity === "transaction") && isTransaction(value.transaction);
 }
 
-// Latest upsert per transaction ID wins. A delete tombstone is final: any
-// transaction with a tombstone is omitted, even if a later upsert exists
-// (for example, from a device that was offline when it was deleted).
-function materialize(mutations: Mutation[]): Transaction[] {
-  const latest = new Map<string, UpsertMutation>();
+// Must match legacyCategoryId() in js/db.js.
+function legacyCategoryId(name: string): string {
+  return `legacy:${name.trim().toLowerCase()}`;
+}
+
+function newer(a: { updatedAt: string }, aId: string, b: { updatedAt: string }, bId: string) {
+  return `${a.updatedAt}:${aId}` > `${b.updatedAt}:${bId}`;
+}
+
+// Latest upsert per ID wins. A delete tombstone is final: any transaction
+// with a tombstone is omitted, even if a later upsert exists (for example,
+// from a device that was offline when it was deleted). Categories are never
+// deleted, only archived, because old transactions still reference them.
+//
+// Legacy transactions carry a category name; they get a deterministic
+// category ID, and a category record is synthesized for any such name that
+// has no explicit record. Renaming it writes an explicit record with that ID.
+function materialize(mutations: Mutation[]): Snapshot {
+  const transactions = new Map<string, TransactionUpsert>();
+  const categories = new Map<string, CategoryUpsert>();
   const deleted = new Set<string>();
 
   for (const mutation of mutations) {
     if (mutation.op === "delete") {
       deleted.add(mutation.transactionId);
-      continue;
+    } else if (mutation.entity === "category") {
+      const previous = categories.get(mutation.category.id);
+      if (!previous || newer(mutation.category, mutation.id, previous.category, previous.id)) {
+        categories.set(mutation.category.id, mutation);
+      }
+    } else {
+      const previous = transactions.get(mutation.transaction.id);
+      if (!previous || newer(mutation.transaction, mutation.id, previous.transaction, previous.id)) {
+        transactions.set(mutation.transaction.id, mutation);
+      }
     }
-    const previous = latest.get(mutation.transaction.id);
-    const currentOrder = `${mutation.transaction.updatedAt}:${mutation.id}`;
-    const previousOrder = previous
-      ? `${previous.transaction.updatedAt}:${previous.id}`
-      : "";
-    if (!previous || currentOrder > previousOrder) latest.set(mutation.transaction.id, mutation);
   }
 
-  return [...latest.values()]
+  const legacyNames = new Map<string, string>();
+  const current = [...transactions.values()]
     .filter((mutation) => !deleted.has(mutation.transaction.id))
-    .map((mutation) => ({
-      ...mutation.transaction,
-      type: mutation.transaction.type ?? "expense",
-    }))
+    .map(({ transaction }) => {
+      const { category, ...rest } = transaction;
+      let categoryId = transaction.categoryId;
+      if (!categoryId) {
+        const name = (category ?? "").trim().toLowerCase() || "uncategorized";
+        categoryId = legacyCategoryId(name);
+        legacyNames.set(categoryId, name);
+      }
+      return { ...rest, categoryId, type: transaction.type ?? "expense" };
+    })
     .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+
+  const records = [...categories.values()].map((mutation) => mutation.category);
+  const synthesized = [...legacyNames]
+    .filter(([id]) => !categories.has(id))
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([id, name], index) => ({
+      id,
+      name,
+      order: records.length + index,
+      archived: false,
+      updatedAt: "1970-01-01T00:00:00.000Z",
+    }));
+
+  return {
+    transactions: current,
+    categories: [...records, ...synthesized].sort(
+      (a, b) => a.order - b.order || a.name.localeCompare(b.name),
+    ),
+  };
 }
 
 app.get("/health", (context) => context.json({ ok: true }));
@@ -185,7 +269,7 @@ app.use("*", async (context, next) => {
 
 app.get("/transactions", async (context) => {
   const file = await readGitHubFile();
-  return context.json({ transactions: materialize(parseMutations(file.content)) });
+  return context.json(materialize(parseMutations(file.content)));
 });
 
 app.post("/sync", async (context) => {
@@ -206,7 +290,7 @@ app.post("/sync", async (context) => {
     const accepted = incoming.filter((mutation) => !knownIds.has(mutation.id));
 
     if (accepted.length === 0) {
-      return context.json({ accepted: 0, transactions: materialize(existing) });
+      return context.json({ accepted: 0, ...materialize(existing) });
     }
 
     const allMutations = [...existing, ...accepted];
@@ -216,7 +300,7 @@ app.post("/sync", async (context) => {
     if (response.ok) {
       return context.json({
         accepted: accepted.length,
-        transactions: materialize(allMutations),
+        ...materialize(allMutations),
       });
     }
 

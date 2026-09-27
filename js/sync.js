@@ -30,10 +30,7 @@ async function pushAndPull() {
   }
 
   const result = await response.json();
-  await replaceSnapshot(
-    result.transactions,
-    mutations.map((mutation) => mutation.id),
-  );
+  await replaceSnapshot(result, mutations.map((mutation) => mutation.id));
   await setSetting(LAST_SYNC_KEY, new Date().toISOString());
   return result;
 }

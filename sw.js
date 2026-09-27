@@ -1,4 +1,4 @@
-const CACHE = "expense-log-v13";
+const CACHE = "expense-log-v14";
 const STATIC_FILES = [
   "/",
   "/index.html",
@@ -6,6 +6,8 @@ const STATIC_FILES = [
   "/transactions/index.html",
   "/add/",
   "/add/index.html",
+  "/categories/",
+  "/categories/index.html",
   "/analytics/",
   "/analytics/index.html",
   "/app.js",
@@ -15,6 +17,7 @@ const STATIC_FILES = [
   "/js/format.js",
   "/js/sync.js",
   "/js/pages/add.js",
+  "/js/pages/categories.js",
   "/js/pages/home.js",
   "/js/pages/ledger.js",
   "/style.css",

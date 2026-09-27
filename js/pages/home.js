@@ -1,4 +1,4 @@
-import { getTransactions } from "../db.js";
+import { getCategoryNames, getTransactions } from "../db.js";
 import { createCell, money, today } from "../format.js";
 import { setupSync } from "../sync.js";
 
@@ -17,12 +17,11 @@ async function render() {
   document.querySelector("#month-net").textContent = money.format((spent - credits) / 100);
   document.querySelector("#month-count").textContent = String(current.length);
 
+  const categoryNames = await getCategoryNames();
   const categories = new Map();
   for (const transaction of current.filter((record) => record.type !== "credit")) {
-    categories.set(
-      transaction.category,
-      (categories.get(transaction.category) ?? 0) + transaction.amountCents,
-    );
+    const name = categoryNames.get(transaction.categoryId) ?? "—";
+    categories.set(name, (categories.get(name) ?? 0) + transaction.amountCents);
   }
 
   const summary = document.querySelector("#category-summary");

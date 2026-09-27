@@ -57,7 +57,7 @@ Amounts are positive integer cents. `type` is either `expense` or `credit`; cred
     "type": "expense",
     "date": "2026-08-29",
     "amountCents": 1299,
-    "category": "food",
+    "categoryId": "category UUID",
     "merchant": "Example",
     "note": "",
     "updatedAt": "2026-08-30T03:00:00.000Z"
@@ -67,7 +67,11 @@ Amounts are positive integer cents. `type` is either `expense` or `credit`; cred
 
 Each JSONL line is an immutable mutation. The server deduplicates by mutation ID and materializes one transaction per transaction ID. Later updates resolve by `updatedAt`, with mutation ID as a deterministic tie-breaker.
 
-A deletion can later be represented as a tombstone mutation without rewriting history.
+A deletion is a permanent tombstone, `{"op": "delete", "transactionId", "deletedAt"}`.
+
+Categories are a second entity in the same file, `{"op": "upsert", "entity": "category", "category": {"id", "name", "order", "archived", "updatedAt"}}`. They resolve the same way and are archived rather than deleted, because past transactions keep referencing them. Mutations without `entity` are transactions.
+
+Transactions written before configured categories store a `category` name instead of `categoryId`. The server maps each name to the ID `legacy:<name>` and synthesizes a category record for it unless an explicit record with that ID exists, so renaming a legacy category needs no history rewrite.
 
 ## Sync protocol
 
@@ -123,7 +127,7 @@ This is intentionally optimized for one person and a small number of devices, no
 
 - Edit and delete via new immutable mutations
 - CSV import for card statements
-- Category management without a dedicated settings system
+- Configured categories (`/categories/`), selected by buttons on Add
 - Date/category filters
 - Export JSONL and CSV
 

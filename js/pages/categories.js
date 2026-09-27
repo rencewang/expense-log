@@ -1,0 +1,128 @@
+import "../site.js";
+import { getCategories, recordCategories } from "../db.js";
+import { setupSync } from "../sync.js";
+
+const newForm = document.querySelector("#new-category");
+const status = document.querySelector("#category-status");
+const activeList = document.querySelector("#active-categories");
+const archivedList = document.querySelector("#archived-categories");
+const archivedSection = document.querySelector("#archived-section");
+const emptyState = document.querySelector("#empty-state");
+
+function stamp(category, changes) {
+  return { ...category, ...changes, updatedAt: new Date().toISOString() };
+}
+
+function nameTaken(categories, name, exceptId) {
+  const wanted = name.toLowerCase();
+  return categories.some(
+    (category) => category.id !== exceptId && category.name.toLowerCase() === wanted,
+  );
+}
+
+function button(label, onClick, disabled = false) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.textContent = label;
+  element.disabled = disabled;
+  element.addEventListener("click", onClick);
+  return element;
+}
+
+async function save(records, message) {
+  await recordCategories(records);
+  status.textContent = message;
+  await render();
+}
+
+// Moves a category one place and renumbers the active list, recording only
+// the categories whose order changed.
+async function move(active, index, offset) {
+  const reordered = [...active];
+  const [moved] = reordered.splice(index, 1);
+  reordered.splice(index + offset, 0, moved);
+  const changed = reordered
+    .map((category, order) => (category.order === order ? null : stamp(category, { order })))
+    .filter(Boolean);
+  await save(changed, `Moved ${moved.name}.`);
+}
+
+async function render() {
+  const categories = await getCategories();
+  const active = categories.filter((category) => !category.archived);
+  const archived = categories.filter((category) => category.archived);
+
+  activeList.replaceChildren();
+  active.forEach((category, index) => {
+    const form = document.createElement("form");
+    const input = document.createElement("input");
+    input.name = "name";
+    input.value = category.name;
+    input.required = true;
+    input.autocomplete = "off";
+    input.setAttribute("aria-label", `Name of ${category.name}`);
+    const rename = document.createElement("button");
+    rename.type = "submit";
+    rename.textContent = "Rename";
+    form.append(
+      input, " ", rename, " ",
+      button("Up", () => move(active, index, -1), index === 0), " ",
+      button("Down", () => move(active, index, 1), index === active.length - 1), " ",
+      button("Archive", () =>
+        save([stamp(category, { archived: true })], `Archived ${category.name}.`),
+      ),
+    );
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = input.value.trim();
+      if (!name || name === category.name) return;
+      if (nameTaken(categories, name, category.id)) {
+        status.textContent = `A category named ${name} already exists.`;
+        return;
+      }
+      await save([stamp(category, { name })], `Renamed ${category.name} to ${name}.`);
+    });
+    const item = document.createElement("li");
+    item.append(form);
+    activeList.append(item);
+  });
+
+  archivedList.replaceChildren();
+  for (const category of archived) {
+    const item = document.createElement("li");
+    item.append(
+      `${category.name} `,
+      button("Restore", () =>
+        save(
+          [stamp(category, { archived: false, order: active.length })],
+          `Restored ${category.name}.`,
+        ),
+      ),
+    );
+    archivedList.append(item);
+  }
+
+  emptyState.hidden = active.length > 0;
+  activeList.hidden = active.length === 0;
+  archivedSection.hidden = archived.length === 0;
+}
+
+newForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const name = String(new FormData(newForm).get("name")).trim();
+  if (!name) return;
+  const categories = await getCategories();
+  if (nameTaken(categories, name)) {
+    status.textContent = `A category named ${name} already exists.`;
+    return;
+  }
+  const order = Math.max(-1, ...categories.map((category) => category.order)) + 1;
+  await save(
+    [{ id: crypto.randomUUID(), name, order, archived: false, updatedAt: new Date().toISOString() }],
+    `Added ${name}.`,
+  );
+  newForm.reset();
+});
+
+await render();
+await setupSync({ afterSync: render });

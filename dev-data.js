@@ -23,7 +23,19 @@ function localDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-export function createDevelopmentExpenses(now = new Date()) {
+const CATEGORY_NAMES = ["food", "transport", "shopping", "bills", "travel", "other"];
+
+function createDevelopmentCategories(now) {
+  return CATEGORY_NAMES.map((name, order) => ({
+    id: `development-category-${name}`,
+    name,
+    order,
+    archived: false,
+    updatedAt: now.toISOString(),
+  }));
+}
+
+function createDevelopmentTransactions(now) {
   return FIXTURES.map((fixture, index) => {
     const date = new Date(now);
     date.setHours(12, 0, 0, 0);
@@ -34,10 +46,17 @@ export function createDevelopmentExpenses(now = new Date()) {
       type: fixture.type ?? "expense",
       date: localDate(date),
       amountCents: fixture.amountCents,
-      category: fixture.category,
+      categoryId: `development-category-${fixture.category}`,
       merchant: fixture.merchant,
       note: fixture.note,
       updatedAt: date.toISOString(),
     };
   });
+}
+
+export function createDevelopmentData(now = new Date()) {
+  return {
+    transactions: createDevelopmentTransactions(now),
+    categories: createDevelopmentCategories(now),
+  };
 }

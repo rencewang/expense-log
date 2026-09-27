@@ -44,3 +44,9 @@ body {
 .site-nav form {
   margin: 0;
 }
+
+/* Native buttons show no pressed state; mark the selected category. */
+button[aria-pressed="true"] {
+  font-weight: 700;
+  text-decoration: underline;
+}

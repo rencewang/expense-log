@@ -1,14 +1,22 @@
-import { createDevelopmentExpenses } from "../dev-data.js";
+import { createDevelopmentData } from "../dev-data.js";
 
 const IS_LOCAL_DEVELOPMENT = ["localhost", "127.0.0.1", "::1"].includes(location.hostname);
 const DB_NAME = IS_LOCAL_DEVELOPMENT ? "expense-log-dev" : "expense-log";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const STORES = {
   transactions: "transactions",
   mutations: "mutations",
   settings: "settings",
+  categories: "categories",
 };
+
+// Transactions recorded before configured categories stored a category name.
+// Each name maps to a deterministic ID. Must match legacyCategoryId() in
+// api/index.ts.
+export function legacyCategoryId(name) {
+  return `legacy:${name.trim().toLowerCase()}`;
+}
 
 function requestResult(request) {
   return new Promise((resolve, reject) => {
@@ -29,15 +37,52 @@ function openDatabase() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.addEventListener("upgradeneeded", () => {
+    request.addEventListener("upgradeneeded", (event) => {
       const database = request.result;
-      database.createObjectStore(STORES.transactions, { keyPath: "id" });
-      database.createObjectStore(STORES.mutations, { keyPath: "id" });
-      database.createObjectStore(STORES.settings, { keyPath: "key" });
+      if (event.oldVersion < 1) {
+        database.createObjectStore(STORES.transactions, { keyPath: "id" });
+        database.createObjectStore(STORES.mutations, { keyPath: "id" });
+        database.createObjectStore(STORES.settings, { keyPath: "key" });
+      }
+      if (event.oldVersion < 2) {
+        database.createObjectStore(STORES.categories, { keyPath: "id" });
+        migrateLegacyCategories(request.transaction);
+      }
     });
 
     request.addEventListener("success", () => resolve(request.result));
     request.addEventListener("error", () => reject(request.error));
+  });
+}
+
+// Gives local transactions a category ID and creates a category record for
+// each legacy name. The server applies the same mapping to synced history,
+// so these records need no mutations of their own.
+function migrateLegacyCategories(upgrade) {
+  const transactions = upgrade.objectStore(STORES.transactions);
+  const categories = upgrade.objectStore(STORES.categories);
+  const names = new Set();
+  transactions.openCursor().addEventListener("success", (event) => {
+    const cursor = event.target.result;
+    if (cursor) {
+      const { category, ...record } = cursor.value;
+      if (!record.categoryId) {
+        const name = (category ?? "").trim().toLowerCase() || "uncategorized";
+        names.add(name);
+        cursor.update({ ...record, categoryId: legacyCategoryId(name) });
+      }
+      cursor.continue();
+      return;
+    }
+    [...names].sort().forEach((name, order) => {
+      categories.put({
+        id: legacyCategoryId(name),
+        name,
+        order,
+        archived: false,
+        updatedAt: "1970-01-01T00:00:00.000Z",
+      });
+    });
   });
 }
 
@@ -52,9 +97,13 @@ async function seedDevelopmentDatabase() {
   );
   if (count > 0) return;
 
-  const seedTransaction = database.transaction(STORES.transactions, "readwrite");
-  const store = seedTransaction.objectStore(STORES.transactions);
-  for (const expense of createDevelopmentExpenses()) store.put(expense);
+  const { transactions, categories } = createDevelopmentData();
+  const seedTransaction = database.transaction(
+    [STORES.transactions, STORES.categories],
+    "readwrite",
+  );
+  for (const record of transactions) seedTransaction.objectStore(STORES.transactions).put(record);
+  for (const record of categories) seedTransaction.objectStore(STORES.categories).put(record);
   await transactionDone(seedTransaction);
 }
 
@@ -67,6 +116,35 @@ async function getAll(storeName) {
 
 export function getTransactions() {
   return getAll(STORES.transactions);
+}
+
+// Sorted by display order.
+export async function getCategories() {
+  const categories = await getAll(STORES.categories);
+  return categories.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+}
+
+export async function getCategoryNames() {
+  return new Map((await getCategories()).map((category) => [category.id, category.name]));
+}
+
+// Creates, renames, reorders, archives or restores a category. Categories
+// are never deleted because transactions keep referencing them.
+export async function recordCategories(records) {
+  const transaction = database.transaction(
+    [STORES.categories, STORES.mutations],
+    "readwrite",
+  );
+  for (const record of records) {
+    transaction.objectStore(STORES.categories).put(record);
+    transaction.objectStore(STORES.mutations).put({
+      id: crypto.randomUUID(),
+      op: "upsert",
+      entity: "category",
+      category: record,
+    });
+  }
+  await transactionDone(transaction);
 }
 
 export function getMutations() {
@@ -130,21 +208,25 @@ export async function deleteTransaction(transactionId) {
 // Replaces local records with the server snapshot, clearing only the
 // mutations that were sent. Changes made while the sync was in flight stay
 // queued and are reapplied on top of the snapshot.
-export async function replaceSnapshot(transactions, syncedMutationIds) {
+export async function replaceSnapshot({ transactions, categories }, syncedMutationIds) {
   const transaction = database.transaction(
-    [STORES.transactions, STORES.mutations],
+    [STORES.transactions, STORES.categories, STORES.mutations],
     "readwrite",
   );
   const records = transaction.objectStore(STORES.transactions);
+  const categoryRecords = transaction.objectStore(STORES.categories);
   const mutations = transaction.objectStore(STORES.mutations);
 
   for (const id of syncedMutationIds) mutations.delete(id);
   const pending = await requestResult(mutations.getAll());
 
   records.clear();
+  categoryRecords.clear();
   for (const record of transactions) records.put(record);
+  for (const record of categories) categoryRecords.put(record);
   for (const mutation of pending) {
     if (mutation.op === "delete") records.delete(mutation.transactionId);
+    else if (mutation.entity === "category") categoryRecords.put(mutation.category);
     else records.put(mutation.transaction);
   }
   await transactionDone(transaction);

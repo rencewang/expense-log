@@ -35,18 +35,13 @@
             <label for="date">Date</label><br>
             <input id="date" name="date" type="date" required>
           </p>
-          <p>
-            <label for="category">Category</label><br>
-            <input id="category" name="category" list="categories" autocomplete="off" required>
-            <datalist id="categories">
-              <option value="food"></option>
-              <option value="transport"></option>
-              <option value="shopping"></option>
-              <option value="bills"></option>
-              <option value="travel"></option>
-              <option value="other"></option>
-            </datalist>
-          </p>
+          <div role="group" aria-labelledby="category-label">
+            <p>
+              <span id="category-label">Category</span> · <a href="/categories/">Edit categories</a><br>
+              <span id="category-buttons"></span>
+            </p>
+            <input id="category-id" name="categoryId" type="hidden">
+          </div>
           <p>
             <label for="merchant">Merchant</label><br>
             <input id="merchant" name="merchant" autocomplete="off">
