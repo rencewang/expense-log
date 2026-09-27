@@ -13,15 +13,15 @@
   <body>
     <nav class="site-nav" aria-label="Primary">
       <form action="/"><button type="submit">Overview</button></form>
-      <form action="/transactions/"><button type="submit">Ledger</button></form>
+      <form action="/ledger/"><button type="submit">Ledger</button></form>
       <form action="/add/"><button type="submit" aria-current="page" disabled>Add</button></form>
-      <form action="/analytics/"><button type="submit">Analysis</button></form>
+      <form action="/analysis/"><button type="submit">Analysis</button></form>
     </nav>
 
     <main>
       <section aria-labelledby="page-heading">
         <h2 id="page-heading">Add transaction</h2>
-        <form id="expense-form">
+        <form id="transaction-form">
           <p role="group" aria-label="Type">
             Type<br>
             <label><input name="type" type="radio" value="expense" checked> Expense</label>

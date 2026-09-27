@@ -5,10 +5,10 @@
 const CACHE = "expense-log-network-first";
 const STATIC_FILES = [
   "/",
-  "/transactions/",
+  "/ledger/",
   "/add/",
   "/categories/",
-  "/analytics/",
+  "/analysis/",
   "/js/site.js",
   "/js/charts.js",
   "/js/db.js",
@@ -16,7 +16,7 @@ const STATIC_FILES = [
   "/js/sync.js",
   "/js/pages/add.js",
   "/js/pages/categories.js",
-  "/js/pages/home.js",
+  "/js/pages/overview.js",
   "/js/pages/ledger.js",
   "/style.css",
   "/fonts/ABCArealSuperfamilyVariable.woff2",

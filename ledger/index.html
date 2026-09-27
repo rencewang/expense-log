@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="Analyze transactions recorded in Outgo.">
-    <title>Analysis · Outgo</title>
+    <meta name="description" content="Review the complete Outgo transaction ledger.">
+    <title>Ledger · Outgo</title>
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="stylesheet" href="/style.css">
@@ -13,19 +13,25 @@
   <body>
     <nav class="site-nav" aria-label="Primary">
       <form action="/"><button type="submit">Overview</button></form>
-      <form action="/transactions/"><button type="submit">Ledger</button></form>
+      <form action="/ledger/"><button type="submit" aria-current="page" disabled>Ledger</button></form>
       <form action="/add/"><button type="submit">Add</button></form>
-      <form action="/analytics/"><button type="submit" aria-current="page" disabled>Analysis</button></form>
+      <form action="/analysis/"><button type="submit">Analysis</button></form>
     </nav>
 
     <main>
       <section aria-labelledby="page-heading">
-        <h2 id="page-heading">Analysis</h2>
-        <p>Period and category summaries will appear here.</p>
+        <h2 id="page-heading">Ledger</h2>
+        <p id="empty-state">No transactions recorded.</p>
+        <table id="records-table" hidden>
+          <thead>
+            <tr><th>Date</th><th>Merchant</th><th>Category</th><th>Debit</th><th>Credit</th><th></th></tr>
+          </thead>
+          <tbody id="records"></tbody>
+        </table>
       </section>
     </main>
 
     <noscript>This application needs JavaScript for offline storage and sync.</noscript>
-    <script type="module" src="/js/site.js"></script>
+    <script type="module" src="/js/pages/ledger.js"></script>
   </body>
 </html>

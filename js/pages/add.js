@@ -3,7 +3,7 @@ import { deleteTransaction, getCategories, getTransaction, recordTransaction } f
 import { today } from "../format.js";
 import { setupSync } from "../sync.js";
 
-const form = document.querySelector("#expense-form");
+const form = document.querySelector("#transaction-form");
 const dateInput = document.querySelector("#date");
 const status = document.querySelector("#entry-status");
 const heading = document.querySelector("#page-heading");
@@ -84,7 +84,7 @@ form.addEventListener("submit", async (event) => {
   });
 
   if (editing) {
-    location.assign("/transactions/");
+    location.assign("/ledger/");
     return;
   }
 
@@ -99,7 +99,7 @@ form.addEventListener("submit", async (event) => {
 deleteButton.addEventListener("click", async () => {
   if (!editing || !confirm("Delete this transaction? This cannot be undone.")) return;
   await deleteTransaction(editing.id);
-  location.assign("/transactions/");
+  location.assign("/ledger/");
 });
 
 await setupSync({ afterSync: renderCategories });
