@@ -1,5 +1,3 @@
-import { createDevelopmentData } from "../dev-data.js";
-
 const IS_LOCAL_DEVELOPMENT = ["localhost", "127.0.0.1", "::1"].includes(location.hostname);
 const DB_NAME = IS_LOCAL_DEVELOPMENT ? "expense-log-dev" : "expense-log";
 const DB_VERSION = 2;
@@ -58,6 +56,8 @@ async function seedDevelopmentDatabase() {
   );
   if (count > 0) return;
 
+  // Loaded only on localhost, so production never downloads the fixtures.
+  const { createDevelopmentData } = await import("../dev-data.js");
   const { transactions, categories } = createDevelopmentData();
   const seedTransaction = database.transaction(
     [STORES.transactions, STORES.categories],
