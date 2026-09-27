@@ -61,6 +61,8 @@ async function renderCategories() {
 
 await renderCategories();
 
+const { requestSync } = await setupSync({ afterSync: renderCategories });
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = new FormData(form);
@@ -83,6 +85,7 @@ form.addEventListener("submit", async (event) => {
     updatedAt: new Date().toISOString(),
   });
 
+  // Edits return to the Ledger, which syncs pending changes on load.
   if (editing) {
     location.assign("/ledger/");
     return;
@@ -92,8 +95,9 @@ form.addEventListener("submit", async (event) => {
   dateInput.value = today();
   categoryInput.value = "";
   await renderCategories();
-  status.textContent = "Transaction recorded locally.";
+  status.textContent = "Transaction recorded.";
   document.querySelector("#amount").focus();
+  requestSync();
 });
 
 deleteButton.addEventListener("click", async () => {
@@ -101,5 +105,3 @@ deleteButton.addEventListener("click", async () => {
   await deleteTransaction(editing.id);
   location.assign("/ledger/");
 });
-
-await setupSync({ afterSync: renderCategories });

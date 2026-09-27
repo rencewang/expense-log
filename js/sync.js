@@ -58,6 +58,9 @@ async function backgroundSyncDue() {
   return !(Date.now() - lastSyncAt < BACKGROUND_INTERVAL_MS);
 }
 
+// Wires the triggers and returns requestSync(), which a page calls after a
+// local change. It is a background sync, so it respects the session and
+// offline checks, but pending changes mean it always runs.
 export async function setupSync({ afterSync } = {}) {
   const syncButton = document.querySelector("#sync-button");
   const syncStatus = document.querySelector("#sync-status");
@@ -97,4 +100,6 @@ export async function setupSync({ afterSync } = {}) {
 
   // Pages render from IndexedDB first; this never blocks that.
   run({ background: true });
+
+  return { requestSync: () => run({ background: true }) };
 }
