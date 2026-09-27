@@ -1,3 +1,5 @@
+import { localDate } from "./js/format.js";
+
 const FIXTURES = [
   { daysAgo: 0, amountCents: 1842, category: "food", merchant: "Corner Market", note: "Groceries" },
   { daysAgo: 1, amountCents: 475, category: "transport", merchant: "Metro", note: "" },
@@ -15,13 +17,6 @@ const FIXTURES = [
   { daysAgo: 45, amountCents: 1425, category: "food", merchant: "Bakery", note: "" },
   { daysAgo: 63, amountCents: 11200, category: "travel", merchant: "Hotel Example", note: "One night" },
 ];
-
-function localDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 const CATEGORY_NAMES = ["food", "transport", "shopping", "bills", "travel", "other"];
 
