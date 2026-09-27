@@ -1,17 +1,14 @@
-const CACHE = "expense-log-v17";
+// Network first: every request tries the network and refreshes the cache,
+// falling back to the cache only when offline. Deploys take effect without
+// a cache version bump. STATIC_FILES is precached so every page works
+// offline after the first visit; the name changes only if this strategy does.
+const CACHE = "expense-log-network-first";
 const STATIC_FILES = [
   "/",
-  "/index.html",
   "/transactions/",
-  "/transactions/index.html",
   "/add/",
-  "/add/index.html",
   "/categories/",
-  "/categories/index.html",
   "/analytics/",
-  "/analytics/index.html",
-  "/app.js",
-  "/dev-data.js",
   "/js/site.js",
   "/js/charts.js",
   "/js/db.js",
@@ -47,5 +44,24 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(caches.match(event.request).then((cached) => cached ?? fetch(event.request)));
+  event.respondWith(networkFirst(event.request));
 });
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE);
+  // Cache pages without their query string (e.g. /add/?id=...), so one
+  // entry per page serves every variant offline.
+  const key = request.mode === "navigate" ? new URL(request.url).pathname : request;
+  try {
+    const response = await fetch(request);
+    // Skip redirects (such as an expired Vercel sign-in) and errors.
+    if (response.ok && response.type === "basic") {
+      await cache.put(key, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cached = await cache.match(key);
+    if (cached) return cached;
+    throw error;
+  }
+}
