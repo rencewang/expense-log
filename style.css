@@ -1,27 +1,31 @@
+/* One variable file: axes MONO 0-100, wght 400-700, slnt -12-0. */
 @font-face {
   font-family: "ABC Areal";
-  src: url("/fonts/ABCAreal-Regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "ABC Areal";
-  src: url("/fonts/ABCAreal-RegularItalic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 400;
+  src: url("/fonts/ABCArealSuperfamilyVariable.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-style: oblique 0deg 12deg;
   font-display: swap;
 }
 
 body,
 button,
-input {
+input,
+select,
+textarea {
   font-family: "ABC Areal", Arial, sans-serif;
 }
 
+code,
+kbd,
+samp,
+pre,
+.mono {
+  font-family: "ABC Areal", ui-monospace, monospace;
+  font-variation-settings: "MONO" 100;
+}
+
 body {
-  max-width: 48rem;
+  max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem 1rem;
 }
