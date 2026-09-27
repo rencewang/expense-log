@@ -1,6 +1,7 @@
 import "../site.js";
 import { deleteTransaction, getTransaction, recordTransaction } from "../db.js";
 import { today } from "../format.js";
+import { setupSync } from "../sync.js";
 
 const form = document.querySelector("#expense-form");
 const dateInput = document.querySelector("#date");
@@ -63,3 +64,5 @@ deleteButton.addEventListener("click", async () => {
   await deleteTransaction(editing.id);
   location.assign("/transactions/");
 });
+
+await setupSync();
