@@ -225,8 +225,7 @@ function materialize(mutations: Mutation[]): Snapshot {
         legacyNames.set(categoryId, name);
       }
       return { ...rest, categoryId, type: transaction.type ?? "expense" };
-    })
-    .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+    });
 
   const records = [...categories.values()].map((mutation) => mutation.category);
   const synthesized = [...legacyNames]
@@ -240,7 +239,7 @@ function materialize(mutations: Mutation[]): Snapshot {
 
   return {
     transactions: current,
-    categories: [...records, ...synthesized].sort((a, b) => a.name.localeCompare(b.name)),
+    categories: [...records, ...synthesized],
   };
 }
 
