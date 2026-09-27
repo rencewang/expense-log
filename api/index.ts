@@ -170,11 +170,15 @@ function materialize(mutations: Mutation[]): Transaction[] {
 
 app.get("/health", (context) => context.json({ ok: true }));
 
+// Access control is Vercel Authentication on all deployments, applied before
+// this function runs. As defense against cross-site request forgery, writes
+// must come from this site's own origin.
 app.use("*", async (context, next) => {
-  if (context.req.path === "/api/health") return next();
-  const expected = requiredEnvironment("APP_PASSWORD");
-  if (context.req.header("authorization") !== `Bearer ${expected}`) {
-    return context.json({ error: "Unauthorized" }, 401);
+  if (context.req.method === "GET") return next();
+  const origin = context.req.header("origin");
+  const host = context.req.header("host");
+  if (origin && (!host || new URL(origin).host !== host)) {
+    return context.json({ error: "Cross-origin request rejected" }, 403);
   }
   return next();
 });

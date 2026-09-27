@@ -23,7 +23,7 @@ Phone or laptop browser
              | manual POST /api/sync
              v
 Vercel Function
-  Hono API + app-password check
+  Hono API behind Vercel Authentication
   GitHub token held only in Vercel environment
              |
              | GitHub Contents API
@@ -73,7 +73,7 @@ A deletion can later be represented as a tombstone mutation without rewriting hi
 
 1. Entry writes the transaction and its mutation atomically to IndexedDB.
 2. The user presses **Sync** when online.
-3. The client sends all queued mutations with an app password.
+3. The client sends all queued mutations; Vercel Authentication gates the request.
 4. The server reads the current JSONL file, deduplicates mutations, and commits the appended file using its Git blob SHA.
 5. A stale-SHA conflict is retried from the latest file.
 6. The server returns the complete materialized transaction snapshot.
@@ -88,7 +88,7 @@ This is intentionally optimized for one person and a small number of devices, no
 - Local transaction list
 - Current-month total and category totals
 - Manual sync and pull from the private data repository
-- One app password shared across the user's devices
+- Vercel Authentication on all deployments (Vercel account login per device)
 - USD only
 
 ## Explicit non-goals
@@ -152,8 +152,8 @@ This naive query does not collapse later updates; a reusable DuckDB view should 
 
 - `GITHUB_TOKEN` exists only in Vercel server-side environment variables.
 - The token is fine-grained, expires, and can access only the data repository contents.
-- Browsers hold only the app password, optionally in IndexedDB.
-- The API accepts same-origin requests and does not enable broad CORS.
+- Browsers hold no app secret; access rides on the Vercel Authentication cookie.
+- The API rejects cross-origin writes (Origin check) and does not enable broad CORS.
 - The frontend must not execute transaction values through `innerHTML`.
 - This authentication design is acceptable for one private user, not a public multi-tenant service.
 

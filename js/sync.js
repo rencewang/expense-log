@@ -1,42 +1,32 @@
-import {
-  getMutations,
-  getSetting,
-  replaceSnapshot,
-  setSetting,
-} from "./db.js";
+import { getMutations, replaceSnapshot, setSetting } from "./db.js";
 
 export async function setupSync({ afterSync } = {}) {
-  const passwordInput = document.querySelector("#app-password");
-  const rememberInput = document.querySelector("#remember-password");
   const syncButton = document.querySelector("#sync-button");
   const syncStatus = document.querySelector("#sync-status");
 
-  if (!passwordInput || !rememberInput || !syncButton || !syncStatus) return;
+  if (!syncButton || !syncStatus) return;
 
-  passwordInput.value = await getSetting("app-password");
+  // Remove the app password stored by earlier versions.
+  await setSetting("app-password", "");
 
   syncButton.addEventListener("click", async () => {
-    const password = passwordInput.value;
-    if (!password) {
-      syncStatus.textContent = "Enter the app password first.";
-      return;
-    }
-
     syncButton.disabled = true;
     syncStatus.textContent = "Syncing…";
 
     try {
-      await setSetting("app-password", rememberInput.checked ? password : "");
       const mutations = await getMutations();
+      // Vercel Authentication handles access. An expired session answers
+      // with a redirect to Vercel's sign-in page instead of the API.
       const response = await fetch("/api/sync", {
         method: "POST",
-        headers: {
-          authorization: `Bearer ${password}`,
-          "content-type": "application/json",
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ mutations }),
+        redirect: "manual",
       });
 
+      if (response.type === "opaqueredirect") {
+        throw new Error("Your Vercel session expired. Reload the page to sign in again.");
+      }
       if (!response.ok) {
         const problem = await response.json().catch(() => ({}));
         throw new Error(problem.error ?? `Sync failed (${response.status})`);
