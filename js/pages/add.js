@@ -3,14 +3,18 @@ import { deleteTransaction, getCategories, getTransaction, recordTransaction } f
 import { today } from "../format.js";
 import { setupSync } from "../sync.js";
 
-const form = document.querySelector("#transaction-form");
-const dateInput = document.querySelector("#date");
-const status = document.querySelector("#entry-status");
-const heading = document.querySelector("#page-heading");
-const submitButton = document.querySelector("#submit-button");
-const deleteButton = document.querySelector("#delete-button");
-const categoryInput = document.querySelector("#category-id");
-const categoryButtons = document.querySelector("#category-buttons");
+const form = /** @type {HTMLFormElement} */ (document.querySelector("#transaction-form"));
+const dateInput = /** @type {HTMLInputElement} */ (document.querySelector("#date"));
+const status = /** @type {HTMLElement} */ (document.querySelector("#entry-status"));
+const heading = /** @type {HTMLElement} */ (document.querySelector("#page-heading"));
+const submitButton = /** @type {HTMLButtonElement} */ (document.querySelector("#submit-button"));
+const deleteButton = /** @type {HTMLButtonElement} */ (document.querySelector("#delete-button"));
+const categoryInput = /** @type {HTMLInputElement} */ (document.querySelector("#category-id"));
+const categoryButtons = /** @type {HTMLElement} */ (document.querySelector("#category-buttons"));
+
+/** Named form control; radio groups come back as a RadioNodeList. */
+const field = (/** @type {string} */ name) =>
+  /** @type {HTMLInputElement | RadioNodeList} */ (form.elements.namedItem(name));
 
 const editId = new URLSearchParams(location.search).get("id");
 const editing = editId ? await getTransaction(editId) : null;
@@ -23,12 +27,12 @@ if (editId && !editing) {
   heading.textContent = "Edit transaction";
   submitButton.textContent = "Save changes";
   deleteButton.hidden = false;
-  form.elements.type.value = editing.type === "credit" ? "credit" : "expense";
-  form.elements.amount.value = (editing.amountCents / 100).toFixed(2);
-  form.elements.date.value = editing.date;
+  field("type").value = editing.type === "credit" ? "credit" : "expense";
+  field("amount").value = (editing.amountCents / 100).toFixed(2);
+  field("date").value = editing.date;
   categoryInput.value = editing.categoryId;
-  form.elements.merchant.value = editing.merchant;
-  form.elements.note.value = editing.note;
+  field("merchant").value = editing.merchant;
+  field("note").value = editing.note;
 } else {
   dateInput.value = today();
 }
@@ -96,7 +100,7 @@ form.addEventListener("submit", async (event) => {
   categoryInput.value = "";
   await renderCategories();
   status.textContent = "Transaction recorded.";
-  document.querySelector("#amount").focus();
+  /** @type {HTMLInputElement} */ (form.elements.namedItem("amount")).focus();
   requestSync();
 });
 

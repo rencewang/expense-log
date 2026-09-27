@@ -3,9 +3,9 @@ import { getCategoryNames, getTransactions } from "../db.js";
 import { createCell, money } from "../format.js";
 import { setupSync } from "../sync.js";
 
-const records = document.querySelector("#records");
-const recordsTable = document.querySelector("#records-table");
-const emptyState = document.querySelector("#empty-state");
+const records = /** @type {HTMLElement} */ (document.querySelector("#records"));
+const recordsTable = /** @type {HTMLTableElement} */ (document.querySelector("#records-table"));
+const emptyState = /** @type {HTMLElement} */ (document.querySelector("#empty-state"));
 
 async function render() {
   const transactions = await getTransactions();

@@ -2,12 +2,12 @@ import "../site.js";
 import { getCategories, recordCategories } from "../db.js";
 import { setupSync } from "../sync.js";
 
-const newForm = document.querySelector("#new-category");
-const status = document.querySelector("#category-status");
-const activeList = document.querySelector("#active-categories");
-const archivedList = document.querySelector("#archived-categories");
-const archivedSection = document.querySelector("#archived-section");
-const emptyState = document.querySelector("#empty-state");
+const newForm = /** @type {HTMLFormElement} */ (document.querySelector("#new-category"));
+const status = /** @type {HTMLElement} */ (document.querySelector("#category-status"));
+const activeList = /** @type {HTMLElement} */ (document.querySelector("#active-categories"));
+const archivedList = /** @type {HTMLElement} */ (document.querySelector("#archived-categories"));
+const archivedSection = /** @type {HTMLElement} */ (document.querySelector("#archived-section"));
+const emptyState = /** @type {HTMLElement} */ (document.querySelector("#empty-state"));
 
 function stamp(category, changes) {
   return { ...category, ...changes, updatedAt: new Date().toISOString() };

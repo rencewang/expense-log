@@ -1,0 +1,17 @@
+{
+  // Type-checks the browser JavaScript. Not strict: the goal is catching
+  // wrong imports, misspelled properties and bad DOM calls, not annotating
+  // every parameter. Element lookups carry JSDoc casts where needed.
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["js/**/*.js", "dev-data.js"]
+}

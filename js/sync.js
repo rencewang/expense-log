@@ -61,9 +61,10 @@ async function backgroundSyncDue() {
 // Wires the triggers and returns requestSync(), which a page calls after a
 // local change. It is a background sync, so it respects the session and
 // offline checks, but pending changes mean it always runs.
+/** @param {{ afterSync?: () => unknown }} [options] */
 export async function setupSync({ afterSync } = {}) {
-  const syncButton = document.querySelector("#sync-button");
-  const syncStatus = document.querySelector("#sync-status");
+  const syncButton = /** @type {HTMLButtonElement} */ (document.querySelector("#sync-button"));
+  const syncStatus = /** @type {HTMLElement} */ (document.querySelector("#sync-status"));
   let sessionExpired = false;
 
   const showStatus = (text) => {
