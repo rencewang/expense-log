@@ -1,6 +1,6 @@
 import "../site.js";
 import { getCategoryNames, getTransactions } from "../db.js";
-import { createCell, money } from "../format.js";
+import { transactionRow } from "../format.js";
 import { setupSync } from "../sync.js";
 
 const records = /** @type {HTMLElement} */ (document.querySelector("#records"));
@@ -14,24 +14,7 @@ async function render() {
 
   records.replaceChildren();
   for (const transaction of transactions) {
-    const type = transaction.type === "credit" ? "credit" : "expense";
-    const amount = money.format(transaction.amountCents / 100);
-    const editLink = document.createElement("a");
-    editLink.href = `/add/?id=${encodeURIComponent(transaction.id)}`;
-    editLink.textContent = "Edit";
-    const editCell = document.createElement("td");
-    editCell.append(editLink);
-
-    const row = document.createElement("tr");
-    row.append(
-      createCell(transaction.date),
-      createCell(transaction.merchant || "—"),
-      createCell(categoryNames.get(transaction.categoryId) ?? "—"),
-      createCell(type === "expense" ? amount : ""),
-      createCell(type === "credit" ? amount : ""),
-      editCell,
-    );
-    records.append(row);
+    records.append(transactionRow(transaction, categoryNames));
   }
 
   recordsTable.hidden = transactions.length === 0;
