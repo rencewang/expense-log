@@ -16,7 +16,12 @@ const categoryButtons = /** @type {HTMLElement} */ (document.querySelector("#cat
 const field = (/** @type {string} */ name) =>
   /** @type {HTMLInputElement | RadioNodeList} */ (form.elements.namedItem(name));
 
-const editId = new URLSearchParams(location.search).get("id");
+const params = new URLSearchParams(location.search);
+const editId = params.get("id");
+// ?date=YYYY-MM-DD prefills the date, as the Overview's Add button does.
+// It stays after each save, so several entries for one day go quickly.
+const requestedDate = params.get("date") ?? "";
+const startDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : today();
 const editing = editId ? await getTransaction(editId) : null;
 
 if (editId && !editing) {
@@ -34,7 +39,7 @@ if (editId && !editing) {
   field("merchant").value = editing.merchant;
   field("note").value = editing.note;
 } else {
-  dateInput.value = today();
+  dateInput.value = startDate;
 }
 
 // Active categories, plus the edited transaction's category if archived.
@@ -96,7 +101,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   form.reset();
-  dateInput.value = today();
+  dateInput.value = startDate;
   categoryInput.value = "";
   await renderCategories();
   status.textContent = "Transaction recorded.";
