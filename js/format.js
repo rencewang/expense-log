@@ -9,8 +9,13 @@ export function createCell(value) {
   return cell;
 }
 
-// One ledger row: optional date, merchant, category, debit, credit, edit link.
-export function transactionRow(transaction, categoryNames, { showDate = true } = {}) {
+// One ledger row: date, merchant, category, debit, credit and an edit link.
+// Date and category can be left out when the surrounding list implies them.
+export function transactionRow(
+  transaction,
+  categoryNames,
+  { showDate = true, showCategory = true } = {},
+) {
   const amount = money.format(transaction.amountCents / 100);
   const credit = transaction.type === "credit";
   const editLink = document.createElement("a");
@@ -21,9 +26,9 @@ export function transactionRow(transaction, categoryNames, { showDate = true } =
 
   const row = document.createElement("tr");
   if (showDate) row.append(createCell(transaction.date));
+  row.append(createCell(transaction.merchant || "—"));
+  if (showCategory) row.append(createCell(categoryNames.get(transaction.categoryId) ?? "—"));
   row.append(
-    createCell(transaction.merchant || "—"),
-    createCell(categoryNames.get(transaction.categoryId) ?? "—"),
     createCell(credit ? "" : amount),
     createCell(credit ? amount : ""),
     editCell,
