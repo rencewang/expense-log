@@ -26,7 +26,7 @@ export function transactionRow(
 
   const row = document.createElement("tr");
   if (showDate) row.append(createCell(transaction.date));
-  row.append(createCell(transaction.merchant || "—"));
+  row.append(createCell(transaction.merchant));
   if (showCategory) row.append(createCell(categoryNames.get(transaction.categoryId) ?? "—"));
   row.append(
     createCell(credit ? "" : amount),
