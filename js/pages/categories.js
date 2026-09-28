@@ -9,6 +9,10 @@ const archivedList = /** @type {HTMLElement} */ (document.querySelector("#archiv
 const archivedSection = /** @type {HTMLElement} */ (document.querySelector("#archived-section"));
 const emptyState = /** @type {HTMLElement} */ (document.querySelector("#empty-state"));
 
+// Set up before any handler can save. render() is hoisted, so a sync that
+// finishes first can redraw the page.
+const { requestSync } = await setupSync({ afterSync: render });
+
 function stamp(category, changes) {
   return { ...category, ...changes, updatedAt: new Date().toISOString() };
 }
@@ -32,6 +36,7 @@ async function save(records, message) {
   await recordCategories(records);
   status.textContent = message;
   await render();
+  requestSync();
 }
 
 async function render() {
@@ -109,4 +114,3 @@ newForm.addEventListener("submit", async (event) => {
 });
 
 await render();
-await setupSync({ afterSync: render });
