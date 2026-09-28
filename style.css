@@ -89,3 +89,16 @@ button[aria-pressed="true"] {
   display: block;
   visibility: hidden;
 }
+
+/* Overview: the two range tabs share the width left after the arrows and
+   Add, which keep their natural size. */
+.view-row {
+  display: flex;
+  gap: 0.25rem;
+  margin: 1em 0;
+}
+
+.view-row .tab {
+  flex: 1 1 0;
+  min-width: 0;
+}

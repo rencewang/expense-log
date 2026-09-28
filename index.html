@@ -24,30 +24,20 @@
           <span id="month-heading">This month</span>
           <button id="next-month" type="button" aria-label="Next month">→</button>
         </h2>
-        <p>
-          <strong id="month-spent">$0.00</strong> spent ·
-          <strong id="month-credits">$0.00</strong> credited ·
-          <strong id="month-net">$0.00</strong> net outflow across
-          <span id="month-count">0</span> transactions.
-        </p>
-
         <div id="day-bars" class="day-bars" role="group" aria-label="Spending by day"></div>
 
-        <p role="group" aria-label="Show transactions for">
-          <button id="month-tab" type="button" aria-pressed="false" aria-controls="month-panel">in this month</button>
-          <button id="day-tab" type="button" aria-pressed="false" aria-controls="day-panel">on this day</button>
-        </p>
+        <div class="view-row" role="group" aria-label="Show transactions">
+          <button id="month-tab" class="tab" type="button" aria-pressed="false" aria-controls="month-panel">in this month</button>
+          <button id="previous-day" type="button" aria-label="Previous day">←</button>
+          <button id="day-tab" class="tab" type="button" aria-pressed="false" aria-controls="day-panel">on this day</button>
+          <button id="next-day" type="button" aria-label="Next day">→</button>
+          <button type="submit" form="add-for-day">Add</button>
+        </div>
+        <form id="add-for-day" action="/add/" hidden>
+          <input id="add-date" name="date" type="hidden">
+        </form>
 
         <div id="day-panel" hidden>
-          <h3>
-            <button id="previous-day" type="button" aria-label="Previous day">←</button>
-            <span id="day-heading"></span>
-            <button id="next-day" type="button" aria-label="Next day">→</button>
-            <button type="submit" form="add-for-day">Add</button>
-          </h3>
-          <form id="add-for-day" action="/add/" hidden>
-            <input id="add-date" name="date" type="hidden">
-          </form>
           <p id="day-empty" hidden>No transactions on this day.</p>
           <table id="day-table" hidden>
             <thead>
@@ -58,6 +48,12 @@
         </div>
 
         <div id="month-panel" hidden>
+          <p>
+            <strong id="month-spent">$0.00</strong> spent ·
+            <strong id="month-credits">$0.00</strong> credited ·
+            <strong id="month-net">$0.00</strong> net outflow across
+            <span id="month-count">0</span> transactions.
+          </p>
           <p id="month-empty" hidden>No transactions this month.</p>
           <div id="month-categories"></div>
         </div>

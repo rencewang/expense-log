@@ -24,7 +24,6 @@ const nextDay = /** @type {HTMLButtonElement} */ (document.querySelector("#next-
 const addDate = /** @type {HTMLInputElement} */ (document.querySelector("#add-date"));
 const monthEmpty = /** @type {HTMLElement} */ (document.querySelector("#month-empty"));
 const monthCategories = /** @type {HTMLElement} */ (document.querySelector("#month-categories"));
-const dayHeading = /** @type {HTMLElement} */ (document.querySelector("#day-heading"));
 const dayEmpty = /** @type {HTMLElement} */ (document.querySelector("#day-empty"));
 const dayTable = /** @type {HTMLTableElement} */ (document.querySelector("#day-table"));
 const dayRecords = /** @type {HTMLElement} */ (document.querySelector("#day-records"));
@@ -197,20 +196,20 @@ async function render({ scrollToDay = false, focusDay = false } = {}) {
   monthTab.onclick = () => go({ month, day, view: "month" });
   dayTab.onclick = () => go({ month, day: tabDay, view: "day" });
 
-  if (view === "day" && day) {
-    dayHeading.textContent = dayName.format(parseDay(day));
-    addDate.value = day;
-    // Days cross into neighbouring months; there is nothing after today.
-    previousDay.onclick = () => {
-      const target = shiftDay(day, -1);
-      go({ month: target.slice(0, 7), day: target, view: "day" }, { scrollToDay: true });
-    };
-    nextDay.disabled = day >= today();
-    nextDay.onclick = () => {
-      const target = shiftDay(day, 1);
-      go({ month: target.slice(0, 7), day: target, view: "day" }, { scrollToDay: true });
-    };
+  // The arrows and Add act on the day in the "on" tab, so they also work
+  // from the month view: an arrow moves the day and switches to it. Days
+  // cross into neighbouring months; there is nothing after today.
+  addDate.value = tabDay;
+  dayTab.setAttribute("aria-label", `on ${dayName.format(parseDay(tabDay))}`);
+  const moveDay = (/** @type {number} */ offset) => {
+    const target = shiftDay(tabDay, offset);
+    go({ month: target.slice(0, 7), day: target, view: "day" }, { scrollToDay: true });
+  };
+  previousDay.onclick = () => moveDay(-1);
+  nextDay.onclick = () => moveDay(1);
+  nextDay.disabled = tabDay >= today();
 
+  if (view === "day" && day) {
     const dayTransactions = byDay.get(day) ?? [];
     dayTransactions.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     dayRecords.replaceChildren(
