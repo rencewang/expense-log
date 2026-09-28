@@ -19,14 +19,32 @@
     </nav>
 
     <main>
-      <section aria-labelledby="summary-heading">
-        <h2 id="summary-heading">This month</h2>
+      <section aria-labelledby="month-heading">
+        <h2 id="month-heading">This month</h2>
+        <p>
+          <a id="previous-month" href="/">Previous month</a>
+          <span id="next-month-separator"> · </span>
+          <a id="next-month" href="/">Next month</a>
+        </p>
         <p>
           <strong id="month-spent">$0.00</strong> spent ·
           <strong id="month-credits">$0.00</strong> credited ·
           <strong id="month-net">$0.00</strong> net outflow across
           <span id="month-count">0</span> transactions.
         </p>
+
+        <div id="day-bars" class="day-bars" role="group" aria-label="Spending by day"></div>
+
+        <h3 id="day-heading">Choose a day</h3>
+        <p id="day-empty" hidden>No transactions on this day.</p>
+        <table id="day-table" hidden>
+          <thead>
+            <tr><th>Merchant</th><th>Category</th><th>Debit</th><th>Credit</th><th></th></tr>
+          </thead>
+          <tbody id="day-records"></tbody>
+        </table>
+
+        <h3>By category</h3>
         <table>
           <thead>
             <tr><th>Category</th><th>Amount</th></tr>

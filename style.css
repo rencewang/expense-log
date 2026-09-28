@@ -50,3 +50,42 @@ button[aria-pressed="true"] {
   font-weight: 700;
   text-decoration: underline;
 }
+
+/* Month view: one native button per day, scrolling sideways. The bar's
+   height is that day's spending; the hollow mark below it means credits. */
+.day-bars {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.5rem;
+}
+
+.day-bars button {
+  flex: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  height: 8rem;
+  padding: 2px;
+  scroll-snap-align: start;
+}
+
+.day-bars .bar {
+  width: 100%;
+  background: currentColor;
+}
+
+.day-bars .credit {
+  width: 100%;
+  height: 4px;
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+}
+
+.day-bars .credit[hidden] {
+  display: block;
+  visibility: hidden;
+}
