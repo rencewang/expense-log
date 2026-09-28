@@ -1,4 +1,4 @@
-import "../site.js";
+import { cameFromApp } from "../site.js";
 import { deleteTransaction, getCategories, getTransaction, recordTransaction } from "../db.js";
 import { today } from "../format.js";
 import { setupSync } from "../sync.js";
@@ -9,6 +9,7 @@ const status = /** @type {HTMLElement} */ (document.querySelector("#entry-status
 const heading = /** @type {HTMLElement} */ (document.querySelector("#page-heading"));
 const submitButton = /** @type {HTMLButtonElement} */ (document.querySelector("#submit-button"));
 const deleteButton = /** @type {HTMLButtonElement} */ (document.querySelector("#delete-button"));
+const cancelButton = /** @type {HTMLButtonElement} */ (document.querySelector("#cancel-button"));
 const categoryInput = /** @type {HTMLInputElement} */ (document.querySelector("#category-id"));
 const categoryButtons = /** @type {HTMLElement} */ (document.querySelector("#category-buttons"));
 
@@ -107,6 +108,13 @@ form.addEventListener("submit", async (event) => {
   status.textContent = "Transaction recorded.";
   /** @type {HTMLInputElement} */ (form.elements.namedItem("amount")).focus();
   requestSync();
+});
+
+// Cancel returns to the page that opened the form, saving nothing. Opened
+// directly, with no app page before it in this tab, it goes to the Overview.
+cancelButton.addEventListener("click", () => {
+  if (cameFromApp() && history.length > 1) history.back();
+  else location.assign("/");
 });
 
 deleteButton.addEventListener("click", async () => {
