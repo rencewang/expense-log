@@ -98,6 +98,14 @@ export async function setupSync({ afterSync } = {}) {
     if (document.visibilityState === "visible") run({ background: true });
   });
   window.addEventListener("online", () => run({ background: true }));
+  // Back and Forward can restore a page from the browser's cache without
+  // rerunning its script, e.g. returning from the Add form. Redraw from
+  // IndexedDB, then sync what changed meanwhile.
+  window.addEventListener("pageshow", async (event) => {
+    if (!event.persisted) return;
+    await afterSync?.();
+    run({ background: true });
+  });
 
   // Pages render from IndexedDB first; this never blocks that.
   run({ background: true });

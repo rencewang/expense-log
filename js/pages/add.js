@@ -1,4 +1,4 @@
-import { cameFromApp } from "../site.js";
+import { goBack } from "../site.js";
 import { deleteTransaction, getCategories, getTransaction, recordTransaction } from "../db.js";
 import { today } from "../format.js";
 import { setupSync } from "../sync.js";
@@ -20,7 +20,6 @@ const field = (/** @type {string} */ name) =>
 const params = new URLSearchParams(location.search);
 const editId = params.get("id");
 // ?date=YYYY-MM-DD prefills the date, as the Overview's Add button does.
-// It stays after each save, so several entries for one day go quickly.
 const requestedDate = params.get("date") ?? "";
 const startDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : today();
 const editing = editId ? await getTransaction(editId) : null;
@@ -71,7 +70,7 @@ async function renderCategories() {
 
 await renderCategories();
 
-const { requestSync } = await setupSync({ afterSync: renderCategories });
+await setupSync({ afterSync: renderCategories });
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -95,27 +94,13 @@ form.addEventListener("submit", async (event) => {
     updatedAt: new Date().toISOString(),
   });
 
-  // Edits return to the Ledger, which syncs pending changes on load.
-  if (editing) {
-    location.assign("/ledger/");
-    return;
-  }
-
-  form.reset();
-  dateInput.value = startDate;
-  categoryInput.value = "";
-  await renderCategories();
-  status.textContent = "Transaction recorded.";
-  /** @type {HTMLInputElement} */ (form.elements.namedItem("amount")).focus();
-  requestSync();
+  // Back to the page that opened the form. It redraws and syncs the
+  // pending change when shown (see setupSync).
+  goBack();
 });
 
-// Cancel returns to the page that opened the form, saving nothing. Opened
-// directly, with no app page before it in this tab, it goes to the Overview.
-cancelButton.addEventListener("click", () => {
-  if (cameFromApp() && history.length > 1) history.back();
-  else location.assign("/");
-});
+// Cancel does the same without saving.
+cancelButton.addEventListener("click", goBack);
 
 deleteButton.addEventListener("click", async () => {
   if (!editing || !confirm("Delete this transaction? This cannot be undone.")) return;

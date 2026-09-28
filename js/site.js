@@ -7,9 +7,13 @@ addEventListener("pagehide", () => {
   sessionStorage.setItem(PREVIOUS_PAGE_KEY, location.pathname + location.search);
 });
 
-/** True when the page before this one in this tab was an app page. */
-export function cameFromApp() {
-  return previousPage !== null;
+/**
+ * Returns to the app page this one was opened from. Opened directly, with
+ * no app page before it in this tab, it goes to the Overview instead.
+ */
+export function goBack() {
+  if (previousPage !== null && history.length > 1) history.back();
+  else location.assign("/");
 }
 
 if ("serviceWorker" in navigator) {
