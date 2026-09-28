@@ -12,9 +12,8 @@ import { setupSync } from "../sync.js";
 //                 day when a day is selected, otherwise month)
 
 const monthHeading = /** @type {HTMLElement} */ (document.querySelector("#month-heading"));
-const previousLink = /** @type {HTMLAnchorElement} */ (document.querySelector("#previous-month"));
-const nextLink = /** @type {HTMLAnchorElement} */ (document.querySelector("#next-month"));
-const nextSeparator = /** @type {HTMLElement} */ (document.querySelector("#next-month-separator"));
+const previousMonth = /** @type {HTMLButtonElement} */ (document.querySelector("#previous-month"));
+const nextMonth = /** @type {HTMLButtonElement} */ (document.querySelector("#next-month"));
 const dayBars = /** @type {HTMLElement} */ (document.querySelector("#day-bars"));
 const monthTab = /** @type {HTMLButtonElement} */ (document.querySelector("#month-tab"));
 const dayTab = /** @type {HTMLButtonElement} */ (document.querySelector("#day-tab"));
@@ -121,13 +120,11 @@ async function render({ scrollToDay = false, focusDay = false } = {}) {
   const title = monthName.format(firstOfMonth(month));
   monthHeading.textContent = title;
   document.title = `${title} · Outgo`;
-  previousLink.href = stateUrl({ month: shiftMonth(month, -1) });
-  previousLink.textContent = `← ${shortMonth.format(firstOfMonth(shiftMonth(month, -1)))}`;
-  const hasNext = month < currentMonth;
-  nextLink.hidden = !hasNext;
-  nextSeparator.hidden = !hasNext;
-  nextLink.href = stateUrl({ month: shiftMonth(month, 1) });
-  nextLink.textContent = `${shortMonth.format(firstOfMonth(shiftMonth(month, 1)))} →`;
+  // Month arrows change the URL in place, like the day arrows; there is
+  // nothing after the current month.
+  previousMonth.onclick = () => go({ month: shiftMonth(month, -1) }, { scrollToDay: true });
+  nextMonth.disabled = month >= currentMonth;
+  nextMonth.onclick = () => go({ month: shiftMonth(month, 1) }, { scrollToDay: true });
 
   const monthTotals = totals(current);
   document.querySelector("#month-spent").textContent = money.format(monthTotals.spent / 100);
@@ -194,8 +191,11 @@ async function render({ scrollToDay = false, focusDay = false } = {}) {
   dayTab.setAttribute("aria-pressed", String(view === "day"));
   monthPanel.hidden = view !== "month";
   dayPanel.hidden = view !== "day";
+  const tabDay = day ?? `${month}-01`;
+  monthTab.textContent = `in ${shortMonth.format(firstOfMonth(month))}`;
+  dayTab.textContent = `on ${Number(tabDay.slice(5, 7))}/${Number(tabDay.slice(8))}`;
   monthTab.onclick = () => go({ month, day, view: "month" });
-  dayTab.onclick = () => go({ month, day: day ?? `${month}-01`, view: "day" });
+  dayTab.onclick = () => go({ month, day: tabDay, view: "day" });
 
   if (view === "day" && day) {
     dayHeading.textContent = dayName.format(parseDay(day));
