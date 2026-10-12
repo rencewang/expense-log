@@ -102,3 +102,32 @@ button[aria-pressed="true"] {
   flex: 1 1 0;
   min-width: 0;
 }
+
+/* Tables: outlined cells, columns sharing the width evenly. */
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid;
+  padding: 0.25em 0.5em;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+/* Month view: each category group reads as one bordered table row. */
+#month-categories details {
+  border: 1px solid;
+  padding: 0.25em 0.5em;
+}
+
+#month-categories details + details {
+  border-top: none;
+}
+
+#month-categories details table {
+  margin: 0.25em 0;
+}
