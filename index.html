@@ -58,13 +58,12 @@
           <div id="month-categories"></div>
         </div>
       </section>
-
-      <section aria-labelledby="sync-heading">
-        <h2 id="sync-heading">Sync</h2>
-        <button id="sync-button" type="button">Sync now</button>
-        <p id="sync-status" role="status">Not synced this session.</p>
-      </section>
     </main>
+
+    <footer class="sync-bar" aria-label="Sync">
+      <button id="sync-button" type="button">Sync now</button>
+      <span id="sync-status" role="status">Not synced this session.</span>
+    </footer>
 
     <noscript>This application needs JavaScript for offline storage and sync.</noscript>
     <script type="module" src="/js/pages/overview.js"></script>

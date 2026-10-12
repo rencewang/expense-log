@@ -45,6 +45,36 @@ body {
   margin: 0;
 }
 
+/* Sync: one small row fixed to the bottom of every page. The body's bottom
+   padding keeps the last of the content clear of it. */
+body {
+  padding-bottom: 3rem;
+}
+
+.sync-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  background: Canvas;
+  white-space: nowrap;
+}
+
+.sync-bar button {
+  font-size: inherit;
+}
+
+.sync-bar [role="status"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Native buttons show no pressed state; mark the selected category. */
 button[aria-pressed="true"] {
   font-weight: 700;

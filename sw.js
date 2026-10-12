@@ -18,6 +18,7 @@ const STATIC_FILES = [
   "/js/pages/categories.js",
   "/js/pages/overview.js",
   "/js/pages/ledger.js",
+  "/js/pages/analysis.js",
   "/style.css",
   "/fonts/ABCArealSuperfamilyVariable.woff2",
   "/manifest.webmanifest",
