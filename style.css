@@ -42,7 +42,12 @@ body {
 }
 
 .site-nav form {
+  flex: 1 1 0;
   margin: 0;
+}
+
+.site-nav button {
+  width: 100%;
 }
 
 /* Sync: one small row fixed to the bottom of every page. The body's bottom
@@ -118,6 +123,18 @@ button[aria-pressed="true"] {
 .day-bars .credit[hidden] {
   display: block;
   visibility: hidden;
+}
+
+/* Overview: the month name sits centred at its natural width, and the two
+   arrows share the rest of the row. */
+.month-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-row button {
+  flex: 1 1 0;
 }
 
 /* Overview: the two range tabs share the width left after the arrows and
