@@ -118,16 +118,15 @@ td {
   overflow-wrap: anywhere;
 }
 
-/* Month view: each category group reads as one bordered table row. */
-#month-categories details {
+/* Month view: the shared header, each category summary and its rows stack
+   into what reads as one table. Each piece drops its top border so the
+   lines don't double up. */
+#month-categories summary {
   border: 1px solid;
+  border-top: none;
   padding: 0.25em 0.5em;
 }
 
-#month-categories details + details {
+#month-categories details tr:first-child td {
   border-top: none;
-}
-
-#month-categories details table {
-  margin: 0.25em 0;
 }

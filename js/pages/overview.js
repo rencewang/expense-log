@@ -249,6 +249,12 @@ function renderMonthCategories(current, categoryNames) {
     .sort((a, b) => b.spent - a.spent || a.name.localeCompare(b.name));
 
   monthCategories.replaceChildren();
+  // One shared header, so the summaries and their rows read as one table.
+  if (ordered.length) {
+    const header = document.createElement("table");
+    header.innerHTML = "<thead><tr><th>Date</th><th>Merchant</th><th>Debit</th><th>Credit</th><th></th></tr></thead>";
+    monthCategories.append(header);
+  }
   for (const group of ordered) {
     const details = document.createElement("details");
     details.dataset.categoryId = group.categoryId;
@@ -259,15 +265,13 @@ function renderMonthCategories(current, categoryNames) {
     summary.textContent = parts.join(" · ");
 
     const table = document.createElement("table");
-    const head = document.createElement("thead");
-    head.innerHTML = "<tr><th>Date</th><th>Merchant</th><th>Debit</th><th>Credit</th><th></th></tr>";
     const body = document.createElement("tbody");
     body.append(
       ...group.records.map((transaction) =>
         transactionRow(transaction, categoryNames, { showCategory: false }),
       ),
     );
-    table.append(head, body);
+    table.append(body);
     details.append(summary, table);
     monthCategories.append(details);
   }
