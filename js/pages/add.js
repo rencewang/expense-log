@@ -28,7 +28,7 @@ if (editId && !editing) {
   heading.textContent = "Transaction not found";
   form.hidden = true;
 } else if (editing) {
-  document.title = "Edit transaction · Outgo";
+  document.title = "Edit transaction";
   heading.textContent = "Edit transaction";
   submitButton.textContent = "Save changes";
   deleteButton.hidden = false;

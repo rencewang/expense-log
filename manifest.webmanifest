@@ -1,6 +1,6 @@
 {
-  "name": "Outgo",
-  "short_name": "Outgo",
+  "name": "Expenses",
+  "short_name": "Expenses",
   "description": "A small and private expense tracker.",
   "start_url": "/",
   "display": "standalone",

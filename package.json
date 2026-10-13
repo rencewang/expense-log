@@ -1,5 +1,5 @@
 {
-  "name": "expense-log",
+  "name": "expenses.jsonl",
   "version": "0.0.0",
   "private": true,
   "type": "module",

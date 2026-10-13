@@ -118,7 +118,7 @@ async function render({ scrollToDay = false, focusDay = false } = {}) {
   // Month heading, navigation and totals.
   const title = monthName.format(firstOfMonth(month));
   monthHeading.textContent = title;
-  document.title = `${title} · Outgo`;
+  document.title = `${title}`;
   // Month arrows change the URL in place, like the day arrows; there is
   // nothing after the current month.
   previousMonth.onclick = () => go({ month: shiftMonth(month, -1) }, { scrollToDay: true });
